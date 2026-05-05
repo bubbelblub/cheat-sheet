@@ -125,6 +125,7 @@
 <div class="tabbar">
   <button class="tab-btn may8 active"  onclick="switchTab('may8')">🗓️ 8 mei &nbsp;— Python · SQL · PowerShell</button>
   <button class="tab-btn may22"        onclick="switchTab('may22')">🗓️ 22 mei — DataCom · Cisco</button>
+  <button class="tab-btn notes"        onclick="switchTab('notes')" style="color:#facc15;opacity:.5;">📓 Mijn Notities</button>
 </div>
 
 <!-- ── SUBNAV (shown per tab) ── -->
@@ -137,6 +138,9 @@
 </div>
 <div class="subnav" id="subnav-may22" style="display:none">
   <a href="#datacom" class="dc" onclick="switchTab('may22')">🌐 DataCom / Cisco</a>
+</div>
+<div class="subnav" id="subnav-notes" style="display:none">
+  <span style="color:#facc15;font-weight:700;font-size:12px;padding:3px 4px;">📓 Persoonlijke notities — alleen zichtbaar in jouw browser</span>
 </div>
 
 <!-- ── SEARCH ── -->
@@ -1300,9 +1304,353 @@ SELECT Firstname, Lastname,
 FROM members;</pre>
 </div>
 
+<!-- ════════ INSERT / UPDATE / DELETE ════════ -->
+<h3>INSERT — Gegevens toevoegen</h3>
+<div class="grid">
+<div class="card">
+<h4>INSERT INTO — syntaxis</h4>
+<pre>-- Één rij toevoegen (alle kolommen opgeven):
+INSERT INTO products (ProductName, UnitPrice, UnitsInStock)
+VALUES ('Nieuw product', 9.99, 100);
+
+-- Meerdere rijen tegelijk:
+INSERT INTO products (ProductName, UnitPrice, UnitsInStock)
+VALUES ('Product A', 5.00, 50),
+       ('Product B', 12.50, 200),
+       ('Product C', 3.75, 75);
+
+-- Alle kolommen (volgorde moet exact overeenkomen met tabel!):
+INSERT INTO categories
+VALUES (9, 'Elektronica', 'Gadgets en apparaten', NULL);
+
+-- Vanuit een andere tabel kopiëren:
+INSERT INTO producten_backup (ProductName, UnitPrice)
+SELECT ProductName, UnitPrice
+FROM products
+WHERE Discontinued = 1;</pre>
+</div>
+<div class="card">
+<h4>Wanneer gebruik je INSERT?</h4>
+<div class="note">💡 INSERT gebruik je als je <strong>nieuwe rijen wilt toevoegen</strong> aan een tabel. Bestaande rijen worden NIET aangeraakt.</div>
+<table>
+<tr><th>Situatie</th><th>Gebruik</th></tr>
+<tr><td>Nieuw lid registreren</td><td><code>INSERT INTO members VALUES (...)</code></td></tr>
+<tr><td>Nieuwe bestelling aanmaken</td><td><code>INSERT INTO orders (...) VALUES (...)</code></td></tr>
+<tr><td>Testdata toevoegen</td><td><code>INSERT INTO ... VALUES (...),(...)</code></td></tr>
+<tr><td>Backup tabel vullen</td><td><code>INSERT INTO backup SELECT * FROM tabel</code></td></tr>
+</table>
+<div class="warn-box">⚠️ Let op auto_increment: als een kolom AUTO_INCREMENT heeft, hoef je die niet mee te geven — de database vult hem zelf in!</div>
+<pre>-- AUTO_INCREMENT kolom (ID) weglaten:
+INSERT INTO members (Active, Firstname, Lastname, Enrolldate, ContributionRateID)
+VALUES (1, 'Nieuw', 'Persoon', '2024-01-01', 2);
+-- ID wordt automatisch het volgende getal</pre>
+</div>
+</div>
+
+<h3>UPDATE — Gegevens wijzigen</h3>
+<div class="grid">
+<div class="card">
+<h4>UPDATE — syntaxis</h4>
+<pre>-- Één waarde aanpassen:
+UPDATE products
+SET UnitPrice = 14.99
+WHERE ProductID = 1;
+
+-- Meerdere kolommen tegelijk:
+UPDATE products
+SET UnitPrice = 14.99,
+    UnitsInStock = 50,
+    ProductName = 'Nieuwe naam'
+WHERE ProductID = 1;
+
+-- Alle rijen in een categorie aanpassen:
+UPDATE products
+SET UnitPrice = UnitPrice * 1.10    -- 10% prijsverhoging
+WHERE CategoryID = 1;
+
+-- Via JOIN updaten (prijs van leverancier aanpassen):
+UPDATE products p
+JOIN suppliers s ON p.SupplierID = s.SupplierID
+SET p.UnitPrice = p.UnitPrice * 0.95
+WHERE s.Country = 'USA';</pre>
+</div>
+<div class="card">
+<h4>Wanneer gebruik je UPDATE? + Gevaar!</h4>
+<div class="note">💡 UPDATE gebruik je als je <strong>bestaande waarden wilt wijzigen</strong>. De rij blijft bestaan, alleen de opgegeven kolommen veranderen.</div>
+<div class="warn-box">🚨 ALTIJD een WHERE gebruiken bij UPDATE!<br>
+Zonder WHERE pas je ALLE rijen in de tabel aan — dit kan niet ongedaan gemaakt worden!<br><br>
+❌ <code>UPDATE products SET UnitPrice = 0</code><br>
+→ Zet de prijs van ALLE producten op 0!<br><br>
+✅ <code>UPDATE products SET UnitPrice = 0 WHERE ProductID = 5</code><br>
+→ Wijzigt alleen product 5.</div>
+<pre>-- Veilige werkwijze: test eerst met SELECT:
+SELECT * FROM products WHERE ProductID = 5;
+-- Ziet er goed uit? Dan pas updaten:
+UPDATE products SET UnitPrice = 0 WHERE ProductID = 5;</pre>
+</div>
+</div>
+
+<h3>DELETE — Gegevens verwijderen</h3>
+<div class="grid">
+<div class="card">
+<h4>DELETE — syntaxis</h4>
+<pre>-- Één rij verwijderen:
+DELETE FROM products
+WHERE ProductID = 5;
+
+-- Meerdere rijen verwijderen:
+DELETE FROM order_details
+WHERE OrderID = 10248;
+
+-- Verwijder op basis van een conditie:
+DELETE FROM products
+WHERE Discontinued = 1
+AND UnitsInStock = 0;
+
+-- Alle rijen verwijderen (tabel BLIJFT bestaan, alleen leeg):
+DELETE FROM products;
+-- Of sneller (maar NIET te herstellen!):
+TRUNCATE TABLE products;
+
+-- DROP TABLE verwijdert de tabel zelf ook volledig:
+DROP TABLE IF EXISTS shippers_duplicate;</pre>
+</div>
+<div class="card">
+<h4>Verschil DELETE / TRUNCATE / DROP</h4>
+<table>
+<tr><th>Commando</th><th>Wat verdwijnt?</th><th>Te herstellen?</th></tr>
+<tr><td><code>DELETE WHERE ...</code></td><td>Specifieke rijen</td><td>Soms (met rollback)</td></tr>
+<tr><td><code>DELETE</code> (zonder WHERE)</td><td>Alle rijen, tabel blijft</td><td>Nee</td></tr>
+<tr><td><code>TRUNCATE</code></td><td>Alle rijen, tabel blijft, ID reset</td><td>Nee</td></tr>
+<tr><td><code>DROP TABLE</code></td><td>Tabel + alle data volledig weg</td><td>Nee</td></tr>
+</table>
+<div class="warn-box">🚨 Zelfde gevaar als UPDATE: gebruik ALTIJD een WHERE bij DELETE!<br>
+Tip: test eerst met <code>SELECT * FROM tabel WHERE ...</code> om te zien wat je gaat verwijderen.</div>
+</div>
+</div>
+
+<h3>CREATE TABLE, ALTER TABLE — Tabelstructuur</h3>
+<div class="grid">
+<div class="card">
+<h4>CREATE TABLE</h4>
+<pre>-- Nieuwe tabel aanmaken:
+CREATE TABLE IF NOT EXISTS studenten (
+  ID          INT           NOT NULL AUTO_INCREMENT,
+  Voornaam    VARCHAR(60)   NOT NULL,
+  Achternaam  VARCHAR(120)  NOT NULL,
+  Email       VARCHAR(200)  NOT NULL,
+  Inschrijfdatum DATE       NOT NULL,
+  Actief      TINYINT(1)    NOT NULL DEFAULT 1,
+  PRIMARY KEY (ID)
+);
+
+-- Tabel kopiëren (structuur + data):
+CREATE TABLE producten_backup AS
+SELECT * FROM products;
+
+-- Tabel kopiëren (alleen structuur, geen data):
+CREATE TABLE producten_leeg LIKE products;</pre>
+</div>
+<div class="card">
+<h4>ALTER TABLE — kolommen toevoegen/wijzigen</h4>
+<pre>-- Kolom toevoegen:
+ALTER TABLE members
+ADD COLUMN Telefoonnummer VARCHAR(20);
+
+-- Kolom verwijderen:
+ALTER TABLE members
+DROP COLUMN Telefoonnummer;
+
+-- Kolom hernoemen + type wijzigen:
+ALTER TABLE members
+CHANGE Firstname Voornaam VARCHAR(80) NOT NULL;
+
+-- Kolom type wijzigen (naam blijft):
+ALTER TABLE members
+MODIFY COLUMN Lastname VARCHAR(200) NOT NULL;
+
+-- Tabel hernoemen:
+RENAME TABLE members TO leden;
+-- Of: ALTER TABLE members RENAME TO leden;</pre>
+</div>
+</div>
+
+<!-- ════════ GEBRUIKERS & RECHTEN ════════ -->
+<h3>Gebruikers &amp; Rechten — GRANT / REVOKE</h3>
+<div class="grid">
+<div class="card">
+<h4>Gebruiker aanmaken en rechten geven</h4>
+<pre>-- Gebruiker aanmaken:
+CREATE USER 'jan'@'localhost' IDENTIFIED BY 'wachtwoord123';
+-- 'localhost' = alleen lokaal inloggen
+-- '%'         = vanaf elk IP-adres inloggen
+
+-- Alle rechten op één database geven:
+GRANT ALL PRIVILEGES ON northwind.* TO 'jan'@'localhost';
+
+-- Alleen lezen (SELECT) geven:
+GRANT SELECT ON northwind.* TO 'jan'@'localhost';
+
+-- Specifieke rechten op één tabel:
+GRANT SELECT, INSERT, UPDATE ON northwind.products TO 'jan'@'localhost';
+
+-- Na elke GRANT: rechten vernieuwen!
+FLUSH PRIVILEGES;
+
+-- Overzicht van alle rechten van een gebruiker:
+SHOW GRANTS FOR 'jan'@'localhost';</pre>
+</div>
+<div class="card">
+<h4>Rechten intrekken en gebruiker verwijderen</h4>
+<pre">-- Specifieke rechten intrekken:
+REVOKE INSERT, UPDATE ON northwind.products FROM 'jan'@'localhost';
+
+-- Alle rechten intrekken:
+REVOKE ALL PRIVILEGES ON northwind.* FROM 'jan'@'localhost';
+
+-- Gebruiker verwijderen:
+DROP USER 'jan'@'localhost';
+
+-- Wachtwoord wijzigen:
+ALTER USER 'jan'@'localhost' IDENTIFIED BY 'nieuwwachtwoord';
+
+-- Alle gebruikers bekijken:
+SELECT User, Host FROM mysql.user;
+
+-- Huidige ingelogde gebruiker:
+SELECT CURRENT_USER();</pre>
+<div class="note">💡 Na elke GRANT of REVOKE altijd <code>FLUSH PRIVILEGES</code> uitvoeren zodat de wijzigingen direct van kracht zijn!</div>
+</div>
+</div>
+
+<div class="grid">
+<div class="card">
+<h4>Rechtensoorten uitgelegd</h4>
+<table>
+<tr><th>Recht</th><th>Wat mag de gebruiker?</th></tr>
+<tr><td><code>SELECT</code></td><td>Gegevens lezen (query's uitvoeren)</td></tr>
+<tr><td><code>INSERT</code></td><td>Nieuwe rijen toevoegen</td></tr>
+<tr><td><code>UPDATE</code></td><td>Bestaande rijen aanpassen</td></tr>
+<tr><td><code>DELETE</code></td><td>Rijen verwijderen</td></tr>
+<tr><td><code>CREATE</code></td><td>Nieuwe tabellen aanmaken</td></tr>
+<tr><td><code>DROP</code></td><td>Tabellen verwijderen</td></tr>
+<tr><td><code>ALTER</code></td><td>Tabelstructuur wijzigen</td></tr>
+<tr><td><code>INDEX</code></td><td>Indexen aanmaken/verwijderen</td></tr>
+<tr><td><code>ALL PRIVILEGES</code></td><td>Alles bovenstaande tegelijk</td></tr>
+<tr><td><code>GRANT OPTION</code></td><td>Rechten doorgeven aan andere gebruikers</td></tr>
+</table>
+</div>
+<div class="card">
+<h4>Rechten via klikken in MySQL Workbench / phpMyAdmin</h4>
+<div class="note">💡 Als je niet via commando's wil werken kan het ook via de GUI!</div>
+<table>
+<tr><th>Tool</th><th>Stappen</th></tr>
+<tr><td><strong>MySQL Workbench</strong></td><td>1. Klik op "Administration" tabblad<br>2. Klik "Users and Privileges"<br>3. Klik "Add Account" → vul naam + wachtwoord in<br>4. Tabblad "Schema Privileges" → klik "Add Entry"<br>5. Selecteer database + vink rechten aan<br>6. Klik "Apply"</td></tr>
+<tr><td><strong>phpMyAdmin</strong></td><td>1. Klik bovenaan op "User accounts"<br>2. Klik "Add user account"<br>3. Vul gebruikersnaam + wachtwoord in<br>4. Vink gewenste rechten aan<br>5. Scroll naar beneden → klik "Go"</td></tr>
+</table>
+</div>
+</div>
+
+<h3>Handige overige SQL-functies</h3>
+<div class="grid">
+<div class="card">
+<h4>IFNULL / COALESCE — omgaan met NULL</h4>
+<pre>-- IFNULL: vervang NULL door een standaardwaarde:
+SELECT ContactName, IFNULL(Fax, 'Geen fax') AS Fax
+FROM customers;
+
+-- COALESCE: eerste niet-NULL waarde uit een lijst:
+SELECT COALESCE(Fax, Phone, 'Geen contact') AS Contact
+FROM customers;
+
+-- IS NULL / IS NOT NULL in WHERE:
+SELECT * FROM customers WHERE Fax IS NULL;
+SELECT * FROM customers WHERE Fax IS NOT NULL;
+
+-- NULL vergelijken werkt NIET met = of !=:
+WHERE Fax = NULL    -- ❌ Dit werkt NOOIT
+WHERE Fax IS NULL   -- ✅ Dit is correct</pre>
+</div>
+<div class="card">
+<h4>CASE WHEN — if/else in SQL</h4>
+<pre">-- CASE WHEN = if/else in een query:
+SELECT ProductName, UnitPrice,
+  CASE
+    WHEN UnitPrice < 10  THEN 'Goedkoop'
+    WHEN UnitPrice < 50  THEN 'Gemiddeld'
+    ELSE                      'Duur'
+  END AS Prijscategorie
+FROM products;
+
+-- CASE in ORDER BY (sorteer op aangepaste volgorde):
+SELECT * FROM orders
+ORDER BY
+  CASE ShipCountry
+    WHEN 'Netherlands' THEN 1
+    WHEN 'Belgium'     THEN 2
+    ELSE 3
+  END;
+
+-- COUNT met CASE (soort pivot):
+SELECT
+  COUNT(CASE WHEN Discontinued = 1 THEN 1 END) AS Gestopt,
+  COUNT(CASE WHEN Discontinued = 0 THEN 1 END) AS Actief
+FROM products;</pre>
+</div>
+</div>
+
+<div class="grid">
+<div class="card">
+<h4>Subquery's</h4>
+<pre>-- Subquery in WHERE (producten duurder dan gemiddeld):
+SELECT ProductName, UnitPrice
+FROM products
+WHERE UnitPrice > (SELECT AVG(UnitPrice) FROM products);
+
+-- Subquery in FROM (als tijdelijke tabel):
+SELECT gem.CategoryID, gem.GemiddeldePrijs
+FROM (
+  SELECT CategoryID, AVG(UnitPrice) AS GemiddeldePrijs
+  FROM products
+  GROUP BY CategoryID
+) AS gem
+WHERE gem.GemiddeldePrijs > 20;
+
+-- EXISTS (check of er rijen bestaan):
+SELECT CompanyName FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o WHERE o.CustomerID = c.CustomerID
+);
+-- = klanten die minstens 1 bestelling hebben</pre>
+</div>
+<div class="card">
+<h4>Transacties — veilig meerdere queries uitvoeren</h4>
+<pre>-- Transactie = groep queries die ALLEMAAL slagen of ALLEMAAL mislukken
+-- Handig als je meerdere tabellen tegelijk moet aanpassen
+
+START TRANSACTION;
+
+UPDATE products SET UnitsInStock = UnitsInStock - 5 WHERE ProductID = 1;
+INSERT INTO order_details (OrderID, ProductID, Quantity) VALUES (99999, 1, 5);
+
+-- Als alles goed gaat: definitief opslaan
+COMMIT;
+
+-- Als er iets fout gaat: alles terugdraaien
+ROLLBACK;
+
+-- Voorbeeld met foutcontrole:
+START TRANSACTION;
+DELETE FROM orders WHERE OrderID = 10248;
+DELETE FROM order_details WHERE OrderID = 10248;
+COMMIT;   -- beide deletes lukten → sla op
+-- Of:
+ROLLBACK; -- iets ging mis → draai alles terug</pre>
+</div>
+</div>
 
 
-
+<!-- ════════ POWERSHELL ════════ -->
 <!-- ════════════════════════════════════════════════════════ POWERSHELL -->
 <div class="section-title ps" id="powershell">🐚 PowerShell — Volledige Referentie</div>
 
@@ -1683,6 +2031,156 @@ Diagram:
       ↓ Nee
   [Opnieuw vragen] ← terugkoppeling naar input</pre>
 </div>
+</div>
+
+<h3>Voorbeeld stroomdiagram — personeelsnummer zoeken (Python)</h3>
+<div class="card" style="padding:20px">
+<h4>Referentie — zo ziet een correct stroomdiagram eruit</h4>
+<div style="overflow-x:auto; margin-top:12px;">
+<svg width="100%" viewBox="0 0 680 920" xmlns="http://www.w3.org/2000/svg" style="max-width:680px;display:block;margin:0 auto;font-family:'JetBrains Mono',monospace;">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Background -->
+<rect width="680" height="920" fill="#0d1117" rx="10"/>
+
+<!-- ── LEGENDA ── -->
+<rect x="460" y="24" width="196" height="158" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="558" y="45" text-anchor="middle" font-size="11" font-weight="700" fill="#8b949e" letter-spacing="0.05em">LEGENDA</text>
+<rect x="472" y="56" width="38" height="22" rx="11" fill="none" stroke="#e6edf3" stroke-width="1.5"/>
+<text x="518" y="71" font-size="10" fill="#e6edf3">Start / Einde</text>
+<rect x="472" y="87" width="38" height="22" rx="3" fill="none" stroke="#4ec9b0" stroke-width="1.5"/>
+<text x="518" y="102" font-size="10" fill="#e6edf3">Actie / Proces</text>
+<polygon points="491,120 509,130 491,140 473,130" fill="none" stroke="#f7c948" stroke-width="1.5"/>
+<text x="518" y="134" font-size="10" fill="#e6edf3">Beslissing (Ja/Nee)</text>
+<polygon points="472,158 500,150 528,158 500,166" fill="none" stroke="#569cd6" stroke-width="1.5"/>
+<text x="518" y="164" font-size="10" fill="#e6edf3">In- / Uitvoer</text>
+
+<!-- ── SHAPES ── -->
+
+<!-- START -->
+<rect x="240" y="28" width="160" height="34" rx="17" fill="#21262d" stroke="#e6edf3" stroke-width="1.5"/>
+<text x="320" y="50" text-anchor="middle" font-size="12" font-weight="700" fill="#e6edf3">Start</text>
+<line x1="320" y1="62" x2="320" y2="90" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- INPUT: invoer lezen -->
+<polygon points="216,90 416,90 396,124 196,124" fill="#1a2332" stroke="#569cd6" stroke-width="1.5"/>
+<text x="306" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#569cd6">invoer = input(...)</text>
+<line x1="320" y1="124" x2="320" y2="154" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- BESLISSING 1: isdigit? -->
+<polygon points="320,154 432,198 320,242 208,198" fill="#21200a" stroke="#f7c948" stroke-width="1.5"/>
+<text x="320" y="193" text-anchor="middle" font-size="11" font-weight="700" fill="#f7c948">invoer.isdigit()</text>
+<text x="320" y="209" text-anchor="middle" font-size="10" fill="#ffe69c">Alleen cijfers?</text>
+
+<!-- Nee links → fout -->
+<line x1="208" y1="198" x2="90" y2="198" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="148" y="190" text-anchor="middle" font-size="10" fill="#ff6b6b" font-weight="700">Nee</text>
+<rect x="20" y="182" width="70" height="32" rx="4" fill="#2a1a1a" stroke="#ff6b6b" stroke-width="1.5"/>
+<text x="55" y="202" text-anchor="middle" font-size="10" font-weight="700" fill="#ff6b6b">Fout: geen</text>
+<!-- fout leidt naar einde -->
+<line x1="55" y1="214" x2="55" y2="868" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3"/>
+<line x1="55" y1="868" x2="255" y2="868" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+
+<!-- Ja omlaag -->
+<line x1="320" y1="242" x2="320" y2="272" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="332" y="260" font-size="10" fill="#3fb950" font-weight="700">Ja</text>
+
+<!-- BESLISSING 2: len > 6? -->
+<polygon points="320,272 432,316 320,360 208,316" fill="#21200a" stroke="#f7c948" stroke-width="1.5"/>
+<text x="320" y="311" text-anchor="middle" font-size="11" font-weight="700" fill="#f7c948">len(invoer) &gt; 6</text>
+<text x="320" y="327" text-anchor="middle" font-size="10" fill="#ffe69c">Meer dan 6 cijfers?</text>
+
+<!-- Ja rechts → fout te lang -->
+<line x1="432" y1="316" x2="580" y2="316" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="500" y="308" text-anchor="middle" font-size="10" fill="#ff6b6b" font-weight="700">Ja</text>
+<rect x="540" y="300" width="80" height="32" rx="4" fill="#2a1a1a" stroke="#ff6b6b" stroke-width="1.5"/>
+<text x="580" y="320" text-anchor="middle" font-size="10" font-weight="700" fill="#ff6b6b">Fout: te lang</text>
+<line x1="580" y1="332" x2="580" y2="868" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3"/>
+<line x1="580" y1="868" x2="424" y2="868" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+
+<!-- Nee omlaag -->
+<line x1="320" y1="360" x2="320" y2="390" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="332" y="378" font-size="10" fill="#3fb950" font-weight="700">Nee</text>
+
+<!-- ACTIE: variabelen -->
+<rect x="185" y="390" width="270" height="44" rx="4" fill="#0d2020" stroke="#4ec9b0" stroke-width="1.5"/>
+<text x="320" y="408" text-anchor="middle" font-size="11" font-weight="700" fill="#4ec9b0">gezocht = int(invoer)</text>
+<text x="320" y="425" text-anchor="middle" font-size="10" fill="#8b949e">gevonden = False</text>
+<line x1="320" y1="434" x2="320" y2="462" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- FOR LUS header -->
+<rect x="185" y="462" width="270" height="34" rx="4" fill="#1a1030" stroke="#bc8cff" stroke-width="1.5"/>
+<text x="320" y="484" text-anchor="middle" font-size="11" font-weight="700" fill="#bc8cff">for nummer in personeelsnummers</text>
+<line x1="320" y1="496" x2="320" y2="524" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- BESLISSING 3: match? -->
+<polygon points="320,524 432,568 320,612 208,568" fill="#21200a" stroke="#f7c948" stroke-width="1.5"/>
+<text x="320" y="563" text-anchor="middle" font-size="11" font-weight="700" fill="#f7c948">nummer == gezocht?</text>
+<text x="320" y="579" text-anchor="middle" font-size="10" fill="#ffe69c">Match gevonden?</text>
+
+<!-- Ja rechts → gevonden -->
+<line x1="432" y1="568" x2="530" y2="568" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="476" y="560" text-anchor="middle" font-size="10" fill="#3fb950" font-weight="700">Ja</text>
+<rect x="530" y="548" width="116" height="40" rx="4" fill="#0d2010" stroke="#3fb950" stroke-width="1.5"/>
+<text x="588" y="565" text-anchor="middle" font-size="10" font-weight="700" fill="#3fb950">Print: gevonden!</text>
+<text x="588" y="581" text-anchor="middle" font-size="10" fill="#8b949e">gevonden = True</text>
+<line x1="588" y1="588" x2="588" y2="622" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<!-- break blok -->
+<rect x="530" y="622" width="116" height="30" rx="4" fill="#2a1a1a" stroke="#ff6b6b" stroke-width="1.5"/>
+<text x="588" y="642" text-anchor="middle" font-size="11" font-weight="700" fill="#ff6b6b">break</text>
+<!-- break leidt naar check gevonden -->
+<line x1="588" y1="652" x2="588" y2="706" stroke="#8b949e" stroke-width="1.5"/>
+<line x1="588" y1="706" x2="454" y2="706" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- Nee omlaag -->
+<line x1="320" y1="612" x2="320" y2="642" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="332" y="630" font-size="10" fill="#ff6b6b" font-weight="700">Nee</text>
+
+<!-- Nog meer nummers? -->
+<polygon points="320,642 420,676 320,710 220,676" fill="#21200a" stroke="#f7c948" stroke-width="1.5"/>
+<text x="320" y="671" text-anchor="middle" font-size="11" font-weight="700" fill="#f7c948">Nog meer nummers?</text>
+<text x="320" y="686" text-anchor="middle" font-size="10" fill="#ffe69c">Lus gaat door</text>
+
+<!-- Ja links → terug naar for -->
+<line x1="220" y1="676" x2="150" y2="676" stroke="#8b949e" stroke-width="1.5"/>
+<line x1="150" y1="676" x2="150" y2="479" stroke="#8b949e" stroke-width="1.5"/>
+<line x1="150" y1="479" x2="185" y2="479" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="136" y="582" text-anchor="middle" font-size="10" fill="#3fb950" font-weight="700" transform="rotate(-90,136,582)">Ja → volgende</text>
+
+<!-- Nee lus klaar -->
+<line x1="320" y1="710" x2="320" y2="736" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="332" y="726" font-size="10" fill="#ff6b6b" font-weight="700">Nee</text>
+
+<!-- BESLISSING 4: gevonden == False? -->
+<polygon points="320,736 426,774 320,812 214,774" fill="#21200a" stroke="#f7c948" stroke-width="1.5"/>
+<text x="320" y="769" text-anchor="middle" font-size="11" font-weight="700" fill="#f7c948">gevonden == False?</text>
+<text x="320" y="785" text-anchor="middle" font-size="10" fill="#ffe69c">Nooit gevonden?</text>
+
+<!-- Ja rechts → niet gevonden -->
+<line x1="426" y1="774" x2="520" y2="774" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="468" y="766" text-anchor="middle" font-size="10" fill="#ff6b6b" font-weight="700">Ja</text>
+<polygon points="480,774 520,756 560,774 520,792" fill="#2a1a1a" stroke="#ff6b6b" stroke-width="1.5"/>
+<text x="520" y="778" text-anchor="middle" font-size="10" font-weight="700" fill="#ff6b6b">Print: niet gevonden</text>
+<line x1="520" y1="792" x2="520" y2="868" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3"/>
+<line x1="520" y1="868" x2="424" y2="868" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+
+<!-- Nee → einde -->
+<line x1="320" y1="812" x2="320" y2="848" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="332" y="833" font-size="10" fill="#3fb950" font-weight="700">Nee</text>
+
+<!-- EINDE -->
+<rect x="240" y="848" width="160" height="34" rx="17" fill="#21262d" stroke="#e6edf3" stroke-width="1.5"/>
+<text x="320" y="870" text-anchor="middle" font-size="12" font-weight="700" fill="#e6edf3">Einde</text>
+
+<!-- KLEURCODERING LABEL -->
+<text x="340" y="910" text-anchor="middle" font-size="10" fill="#30363d">Geel = beslissing · Groen = actie · Blauw = in/uitvoer · Rood = fout/stop · Paars = lus</text>
+</svg>
+</div>
+<div class="note" style="margin-top:14px">💡 <strong>Kleurcodering:</strong> Geel = beslissing (ruit) · Groen = actie/proces · Blauw = in- en uitvoer · Rood = foutmelding of break · Paars = lus. De stippellijnen rechts en links zijn de "fout"-paden die allemaal uitkomen bij Einde.</div>
 </div>
 
 <h3>Tools om een stroomdiagram te tekenen</h3>
@@ -2985,18 +3483,261 @@ Router# no debug all      # debug uitschakelen</pre>
 </div>
 </div>
 
+<!-- ══════════════ TAB: NOTITIES ══════════════ -->
+<div id="panel-notes" class="tab-panel">
+<div class="container">
+
+<div class="section-title" style="border-color:#facc15;color:#facc15;">📓 Gedeelde Notities</div>
+<div class="note">🌐 Notities worden <strong>online opgeslagen</strong> en zijn zichtbaar voor iedereen die de site gebruikt. Kies een gebruikersnaam — je kunt alleen <strong>jouw eigen</strong> notities bewerken en verwijderen. Ideaal om tijdens het examen elkaars aantekeningen te lezen!</div>
+
+<!-- LOGIN -->
+<div id="notes-login" class="card" style="padding:20px;max-width:480px;">
+  <h4 style="margin-bottom:12px;">👤 Kies je gebruikersnaam</h4>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <input id="login-name" type="text" placeholder="Bijv. emma, klaas, bubbelblub..."
+      style="flex:1;min-width:160px;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:8px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;"
+      onkeydown="if(event.key==='Enter')loginNotes()">
+    <button onclick="loginNotes()" style="background:#facc1522;border:1px solid #facc1566;color:#facc15;padding:8px 20px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;">Inloggen →</button>
+  </div>
+  <div id="login-err" style="color:#ff6b6b;font-size:12px;margin-top:8px;display:none;">Vul een gebruikersnaam in!</div>
+  <p style="color:#8b949e;font-size:12px;margin-top:10px;">Geen wachtwoord nodig. Je naam is genoeg om je eigen notities te beheren.</p>
+</div>
+
+<!-- MAIN NOTES UI (hidden until logged in) -->
+<div id="notes-main" style="display:none;">
+
+  <!-- user bar -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+    <span style="background:#facc1522;border:1px solid #facc1566;color:#facc15;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;" id="notes-username-badge"></span>
+    <button onclick="logoutNotes()" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">Wissel gebruiker</button>
+    <span style="color:#8b949e;font-size:12px;" id="notes-status"></span>
+  </div>
+
+  <!-- add note form -->
+  <h3>Notitie toevoegen</h3>
+  <div class="card" style="padding:16px;margin-bottom:16px;">
+    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
+      <input id="note-title" type="text" placeholder="Titel (bijv. SQL GROUP BY uitleg)"
+        style="flex:1;min-width:180px;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:8px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;">
+      <select id="note-tag" style="background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:8px 10px;border-radius:6px;font-family:'Syne',sans-serif;font-size:13px;outline:none;">
+        <option value="📝 Algemeen">📝 Algemeen</option>
+        <option value="🐍 Python">🐍 Python</option>
+        <option value="🗄️ SQL">🗄️ SQL</option>
+        <option value="🐚 PowerShell">🐚 PowerShell</option>
+        <option value="🌐 DataCom">🌐 DataCom</option>
+      </select>
+    </div>
+    <textarea id="note-body" rows="5" placeholder="Schrijf je notitie... tekst, code, wat je hebt geoefend — alles mag!"
+      style="width:100%;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:10px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;outline:none;resize:vertical;line-height:1.6;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">
+      <button onclick="submitNote()" style="background:#facc1522;border:1px solid #facc1566;color:#facc15;padding:7px 18px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;">💾 Opslaan</button>
+      <button onclick="cancelEdit()" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;">✕ Leegmaken</button>
+      <span id="note-save-msg" style="font-size:12px;color:#3fb950;display:none;"></span>
+    </div>
+  </div>
+
+  <!-- filter + all notes -->
+  <h3>Alle notities <span id="notes-count" style="color:#8b949e;font-weight:400;font-size:12px;"></span></h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+    <span style="font-size:12px;color:#8b949e;">Filter:</span>
+    <button onclick="setFilter('all')"          data-filter="all"          class="flt active-flt" style="background:#facc1522;border:1px solid #facc1566;color:#facc15;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;font-weight:700;">Alle</button>
+    <button onclick="setFilter('🐍 Python')"    data-filter="🐍 Python"    class="flt" style="background:#f7c94811;border:1px solid #f7c94844;color:#f7c948;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">🐍 Python</button>
+    <button onclick="setFilter('🗄️ SQL')"       data-filter="🗄️ SQL"       class="flt" style="background:#569cd611;border:1px solid #569cd644;color:#569cd6;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">🗄️ SQL</button>
+    <button onclick="setFilter('🐚 PowerShell')" data-filter="🐚 PowerShell" class="flt" style="background:#4ec9b011;border:1px solid #4ec9b044;color:#4ec9b0;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">🐚 PowerShell</button>
+    <button onclick="setFilter('🌐 DataCom')"   data-filter="🌐 DataCom"   class="flt" style="background:#ff9f4311;border:1px solid #ff9f4344;color:#ff9f43;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">🌐 DataCom</button>
+  </div>
+
+  <div id="notes-loading" style="color:#8b949e;font-size:13px;padding:24px;text-align:center;">⏳ Notities laden...</div>
+  <div id="notes-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+</div><!-- /notes-main -->
+
+</div>
+</div>
+
 <script>
+
 // ── Tab switching ──────────────────────────────────────────────────────────
 function switchTab(name) {
-  ['may8','may22'].forEach(function(t) {
-    document.getElementById('panel-' + t).classList.toggle('active', t === name);
-    document.getElementById('subnav-' + t).style.display = t === name ? 'flex' : 'none';
-    document.querySelector('.tab-btn.' + t).classList.toggle('active', t === name);
+  ['may8','may22','notes'].forEach(function(t) {
+    var panel  = document.getElementById('panel-' + t);
+    var subnav = document.getElementById('subnav-' + t);
+    var btn    = document.querySelector('.tab-btn.' + t);
+    if (panel)  panel.classList.toggle('active', t === name);
+    if (subnav) subnav.style.display = t === name ? 'flex' : 'none';
+    if (btn) {
+      btn.classList.toggle('active', t === name);
+      btn.style.opacity = t === name ? '1' : '0.5';
+    }
   });
   clearHL();
   document.getElementById('search-input').value = '';
   document.getElementById('search-count').textContent = '';
 }
+
+// ── Notes system — online gedeelde opslag ─────────────────────────────────
+var currentUser   = localStorage.getItem('notes-username') || null;
+var currentFilter = 'all';
+var editingKey    = null;
+
+function loginNotes() {
+  var name = document.getElementById('login-name').value.trim().toLowerCase().replace(/\s+/g,'_');
+  if (!name) { document.getElementById('login-err').style.display='block'; return; }
+  document.getElementById('login-err').style.display='none';
+  currentUser = name;
+  localStorage.setItem('notes-username', name);
+  showNotesMain();
+  loadNotes();
+}
+
+function logoutNotes() {
+  currentUser = null;
+  localStorage.removeItem('notes-username');
+  document.getElementById('notes-main').style.display = 'none';
+  document.getElementById('notes-login').style.display = 'block';
+  document.getElementById('login-name').value = '';
+}
+
+function showNotesMain() {
+  document.getElementById('notes-login').style.display = 'none';
+  document.getElementById('notes-main').style.display  = 'block';
+  document.getElementById('notes-username-badge').textContent = '\u{1F464} ' + currentUser;
+}
+
+// Auto-login als naam al bekend is
+document.addEventListener('DOMContentLoaded', function() {
+  if (currentUser) { showNotesMain(); loadNotes(); }
+});
+
+async function loadNotes() {
+  setStatus('Laden...');
+  document.getElementById('notes-loading').style.display = 'block';
+  document.getElementById('notes-list').innerHTML = '';
+  try {
+    var result = await window.storage.list('note:', true);
+    var keys = (result && result.keys) ? result.keys : [];
+    var fetches = keys.map(function(k) {
+      return window.storage.get(k, true).then(function(r) {
+        if (r && r.value) { try { var n=JSON.parse(r.value); n._key=k; return n; } catch(e){return null;} }
+        return null;
+      }).catch(function(){ return null; });
+    });
+    var results = await Promise.all(fetches);
+    var notes = results.filter(Boolean);
+    notes.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
+    document.getElementById('notes-loading').style.display = 'none';
+    document.getElementById('notes-count').textContent = '(' + notes.length + ' totaal)';
+    renderNotes(notes);
+    setStatus('✅ ' + notes.length + ' notitie(s) geladen');
+  } catch(e) {
+    document.getElementById('notes-loading').style.display = 'none';
+    setStatus('❌ Fout: ' + e.message);
+  }
+}
+
+async function submitNote() {
+  var title = document.getElementById('note-title').value.trim();
+  var body  = document.getElementById('note-body').value.trim();
+  var tag   = document.getElementById('note-tag').value;
+  if (!title && !body) return;
+  var msg = document.getElementById('note-save-msg');
+  msg.textContent = 'Opslaan...'; msg.style.display='inline'; msg.style.color='#8b949e';
+  try {
+    var key = editingKey || ('note:' + currentUser + ':' + Date.now());
+    var note = { title:title||'Naamloos', body:body, tag:tag, author:currentUser,
+                 ts:Date.now(), date:new Date().toLocaleString('nl-NL') };
+    await window.storage.set(key, JSON.stringify(note), true);
+    msg.textContent = '✅ Opgeslagen!'; msg.style.color='#3fb950';
+    cancelEdit();
+    loadNotes();
+    setTimeout(function(){ msg.style.display='none'; }, 2500);
+  } catch(e) {
+    msg.textContent = '❌ Fout: ' + e.message; msg.style.color='#ff6b6b';
+  }
+}
+
+async function deleteNote(key) {
+  if (!confirm('Notitie verwijderen?')) return;
+  try { await window.storage.delete(key, true); loadNotes(); }
+  catch(e) { alert('Fout: ' + e.message); }
+}
+
+function startEdit(note) {
+  document.getElementById('note-title').value = note.title;
+  document.getElementById('note-body').value  = note.body;
+  document.getElementById('note-tag').value   = note.tag;
+  editingKey = note._key;
+  document.getElementById('note-title').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('note-title').focus();
+}
+
+function cancelEdit() {
+  document.getElementById('note-title').value = '';
+  document.getElementById('note-body').value  = '';
+  document.getElementById('note-tag').value   = '📝 Algemeen';
+  editingKey = null;
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.flt').forEach(function(b){
+    b.style.fontWeight = b.getAttribute('data-filter') === f ? '700' : '400';
+  });
+  loadNotes();
+}
+
+function setStatus(s) {
+  var el = document.getElementById('notes-status');
+  if (el) el.textContent = s;
+}
+
+function renderNotes(notes) {
+  var list = document.getElementById('notes-list');
+  list.innerHTML = '';
+  var filtered = currentFilter === 'all' ? notes : notes.filter(function(n){ return n.tag === currentFilter; });
+  if (!filtered.length) {
+    list.innerHTML = '<div style="color:#8b949e;font-size:13px;padding:24px;text-align:center;">Geen notities gevonden.</div>';
+    return;
+  }
+  filtered.forEach(function(note) {
+    var isOwn = note.author === currentUser;
+    var card  = document.createElement('div');
+    card.style.cssText = 'background:#161b22;border:1px solid ' + (isOwn ? '#facc1533' : '#30363d') + ';border-radius:10px;padding:14px;';
+    var bodyHtml = (note.body||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    var isOwnBadge = isOwn
+      ? '<span style="font-size:10px;background:#facc1511;border:1px solid #facc1533;color:#facc15;padding:1px 7px;border-radius:10px;">jij</span>'
+      : '<span style="font-size:10px;color:#8b949e;">door <strong>' + (note.author||'?') + '</strong></span>';
+    var editBtn = isOwn
+      ? '<button data-key="' + note._key + '" class="note-edit-btn" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;">✏️ Bewerk</button>'
+        + '<button data-key="' + note._key + '" class="note-del-btn" style="background:#2a1a1a;border:1px solid #ff6b6b44;color:#ff6b6b;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;">🗑️ Verwijder</button>'
+      : '';
+    card.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;flex-wrap:wrap;">' +
+        '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
+          '<span style="font-size:11px;background:#21262d;border-radius:4px;padding:2px 8px;color:#8b949e;">' + note.tag + '</span>' +
+          '<strong style="font-size:14px;color:#e6edf3;">' + (note.title||'').replace(/</g,'&lt;') + '</strong>' +
+          isOwnBadge +
+        '</div>' +
+        '<div style="display:flex;gap:6px;">' + editBtn + '</div>' +
+      '</div>' +
+      '<div style="font-size:12.5px;color:#c9d1d9;font-family:JetBrains Mono,monospace;white-space:pre-wrap;line-height:1.6;background:#0d1117;border-radius:6px;padding:10px;margin-bottom:6px;">' + bodyHtml + '</div>' +
+      '<div style="font-size:11px;color:#484f58;">' + note.date + '</div>';
+    // Store full note data on card for edit
+    card._noteData = note;
+    list.appendChild(card);
+  });
+  // Attach event listeners after render
+  list.querySelectorAll('.note-edit-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var noteCard = btn.closest('div[style]');
+      if (noteCard && noteCard._noteData) startEdit(noteCard._noteData);
+    });
+  });
+  list.querySelectorAll('.note-del-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ deleteNote(btn.dataset.key); });
+  });
+}
+
 
 // ── Search ─────────────────────────────────────────────────────────────────
 var matches = [], cur = 0;
