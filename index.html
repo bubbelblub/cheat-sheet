@@ -1227,6 +1227,96 @@ DROP VIEW customer_details;</pre>
 <tr><td><code>CEIL(getal)</code></td><td>Afronden naar boven</td></tr>
 <tr><td><code>FLOOR(getal)</code></td><td>Afronden naar beneden</td></tr>
 </table>
+<div class="warn-box" style="margin-top:10px">
+📅 <strong>DATUMNOTATIE — altijd JAAR-MAAND-DAG!</strong><br>
+SQL gebruikt altijd <code>'JJJJ-MM-DD'</code> — dus eerst het jaar, dan de maand, dan de dag.<br><br>
+✅ <code>'1996-05-21'</code> → 21 mei 1996 (correct)<br>
+❌ <code>'21-05-1996'</code> → werkt NIET<br>
+❌ <code>'05-21-1996'</code> → werkt NIET<br><br>
+<pre style="margin-top:6px">WHERE OrderDate = '1996-05-21'
+WHERE BirthDate BETWEEN '1950-01-01' AND '1959-12-31'
+WHERE OrderDate > '1994-12-31'
+WHERE HireDate &lt; '2000-01-01'</pre>
+</div>
+</div>
+</div>
+
+<h3>🚨 Foutmeldingen-Checklist — als MySQL rood kleurt</h3>
+<div class="card">
+<h4>Veelgemaakte fouten en hoe je ze oplost</h4>
+<table>
+<tr><th>Foutmelding</th><th>Oorzaak</th><th>Oplossing</th></tr>
+<tr><td><code>Unknown column 'X'</code></td><td>Kolomnaam klopt niet of tabel niet opgegeven</td><td>Check spelling exact — SQL is hoofdlettergevoelig voor kolomnamen. Gebruik <code>tabel.Kolom</code> bij JOIN.</td></tr>
+<tr><td><code>Table doesn't exist</code></td><td>Tabelnaam verkeerd gespeld of verkeerde database</td><td>Typ eerst <code>USE northwind;</code> en controleer de tabelnaam via <code>SHOW TABLES;</code></td></tr>
+<tr><td><code>You have an error in your SQL syntax</code></td><td>Typefout, ontbrekend komma, haakje of aanhalingsteken</td><td>Kijk naar de regel die SQL aanwijst. Controleer of elke <code>'</code> een sluitende <code>'</code> heeft.</td></tr>
+<tr><td><code>Ambiguous column name</code></td><td>Twee tabellen hebben dezelfde kolomnaam bij JOIN</td><td>Gebruik alias: <code>c.CustomerID</code> in plaats van alleen <code>CustomerID</code></td></tr>
+<tr><td><code>Column count doesn't match</code></td><td>Bij INSERT: aantal kolommen ≠ aantal VALUES</td><td>Tel de kolommen en waarden — ze moeten exact overeenkomen.</td></tr>
+<tr><td>Query geeft 0 resultaten</td><td>WHERE-conditie klopt niet of verkeerde waarde</td><td>Test met <code>SELECT * FROM tabel</code> eerst. Check spelling van waarden bijv. <code>'USA'</code> niet <code>'usa'</code></td></tr>
+<tr><td>Datum werkt niet</td><td>Verkeerde datumnotatie</td><td>Gebruik altijd <code>'JJJJ-MM-DD'</code> — dus <code>'1996-05-21'</code> niet <code>'21-05-1996'</code></td></tr>
+<tr><td>JOIN geeft dubbele rijen</td><td>Verkeerde ON-conditie of meerdere matches</td><td>Controleer de <code>ON</code>-kolommen — ze moeten de unieke sleutels zijn.</td></tr>
+</table>
+<div class="note" style="margin-top:10px">💡 <strong>Gouden tip:</strong> bij elke fout eerst <code>USE northwind;</code> typen en uitvoeren. Daarna de query opnieuw proberen — veel fouten komen doordat je in de verkeerde database zit!</div>
+</div>
+
+<h3>📋 Examen Query-Sjablonen — kopieer en pas aan</h3>
+<div class="grid">
+<div class="card">
+<h4>De meest gebruikte query-patronen</h4>
+<pre>-- 1. Filteren op tekst (begint met):
+SELECT ContactName, City FROM customers
+WHERE ContactName LIKE 'A%';     -- begint met A
+WHERE ContactName LIKE '%an%';   -- bevat "an"
+WHERE ContactName LIKE '_a%';    -- 2e letter is a
+
+-- 2. Filteren op datum + sorteren:
+SELECT OrderID, OrderDate FROM orders
+WHERE OrderDate > '1996-12-31'
+ORDER BY OrderDate DESC;         -- nieuwste eerst
+
+-- 3. Filteren op datum tussen twee waarden:
+SELECT * FROM orders
+WHERE OrderDate BETWEEN '1996-01-01' AND '1996-12-31'
+ORDER BY OrderDate ASC;
+
+-- 4. Simpele JOIN (twee tabellen koppelen):
+SELECT c.ContactName, o.OrderID, o.OrderDate
+FROM customers c
+JOIN orders o ON c.CustomerID = o.CustomerID
+WHERE c.Country = 'Germany'
+ORDER BY c.ContactName;
+
+-- 5. JOIN met drie tabellen:
+SELECT c.ContactName, p.ProductName, od.Quantity
+FROM customers c
+JOIN orders o      ON c.CustomerID  = o.CustomerID
+JOIN order_details od ON o.OrderID  = od.OrderID
+JOIN products p    ON od.ProductID  = p.ProductID
+WHERE c.Country = 'France';
+
+-- 6. Groeperen + tellen:
+SELECT c.CompanyName, COUNT(o.OrderID) AS AantalBestellingen
+FROM customers c
+JOIN orders o ON c.CustomerID = o.CustomerID
+GROUP BY c.CustomerID, c.CompanyName
+HAVING COUNT(o.OrderID) > 5
+ORDER BY AantalBestellingen DESC;</pre>
+</div>
+<div class="card">
+<h4>Sjabloon invullen — stappenplan</h4>
+<div class="note">Lees de vraag → bepaal welke tabel(len) → kies het juiste sjabloon → pas kolomnamen aan</div>
+<table>
+<tr><th>Vraag bevat...</th><th>Gebruik</th></tr>
+<tr><td>"toon... uit tabel X"</td><td>Simpele <code>SELECT ... FROM ... WHERE</code></td></tr>
+<tr><td>"van klanten die..." + info uit andere tabel</td><td><code>JOIN</code> op CustomerID</td></tr>
+<tr><td>"aantal", "totaal", "gemiddeld"</td><td><code>COUNT / SUM / AVG</code> + <code>GROUP BY</code></td></tr>
+<tr><td>"meer dan X bestellingen"</td><td><code>GROUP BY</code> + <code>HAVING</code></td></tr>
+<tr><td>"gesorteerd op"</td><td><code>ORDER BY kolom ASC/DESC</code></td></tr>
+<tr><td>"niet uit" / "niet gelijk aan"</td><td><code>NOT IN (...)</code> of <code>&lt;&gt;</code></td></tr>
+<tr><td>"begint met / eindigt met / bevat"</td><td><code>LIKE 'X%'</code> / <code>'%X'</code> / <code>'%X%'</code></td></tr>
+<tr><td>"na datum" / "voor datum"</td><td><code>&gt; 'JJJJ-MM-DD'</code> / <code>&lt; 'JJJJ-MM-DD'</code></td></tr>
+<tr><td>"tussen ... en ..."</td><td><code>BETWEEN 'JJJJ-MM-DD' AND 'JJJJ-MM-DD'</code></td></tr>
+<tr><td>"geen faxnummer" / "leeg"</td><td><code>IS NULL</code></td></tr>
+</table>
 </div>
 </div>
 
@@ -3575,10 +3665,13 @@ function switchTab(name) {
   document.getElementById('search-count').textContent = '';
 }
 
-// ── Notes system — online gedeelde opslag ─────────────────────────────────
+// ── Notes system — JSONBin.io gedeelde opslag ────────────────────────────
 var currentUser   = localStorage.getItem('notes-username') || null;
 var currentFilter = 'all';
 var editingKey    = null;
+var BIN_ID  = '6839f0ad8561e97a500f0e0b';
+var API_KEY = '$2a$10$s6nMeJTcSvobx6RFpVW6jOFJh2JE/z.eDXCRrkwJFjOKCbv7iYhUq';
+var BIN_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
 
 function loginNotes() {
   var name = document.getElementById('login-name').value.trim().toLowerCase().replace(/\s+/g,'_');
@@ -3604,7 +3697,6 @@ function showNotesMain() {
   document.getElementById('notes-username-badge').textContent = '\u{1F464} ' + currentUser;
 }
 
-// Auto-login als naam al bekend is
 document.addEventListener('DOMContentLoaded', function() {
   if (currentUser) { showNotesMain(); loadNotes(); }
 });
@@ -3614,25 +3706,32 @@ async function loadNotes() {
   document.getElementById('notes-loading').style.display = 'block';
   document.getElementById('notes-list').innerHTML = '';
   try {
-    var result = await window.storage.list('note:', true);
-    var keys = (result && result.keys) ? result.keys : [];
-    var fetches = keys.map(function(k) {
-      return window.storage.get(k, true).then(function(r) {
-        if (r && r.value) { try { var n=JSON.parse(r.value); n._key=k; return n; } catch(e){return null;} }
-        return null;
-      }).catch(function(){ return null; });
-    });
-    var results = await Promise.all(fetches);
-    var notes = results.filter(Boolean);
+    var resp = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
+    var data = await resp.json();
+    var notes = (data.record && data.record.notes) ? data.record.notes : [];
     notes.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
     document.getElementById('notes-loading').style.display = 'none';
     document.getElementById('notes-count').textContent = '(' + notes.length + ' totaal)';
     renderNotes(notes);
-    setStatus('✅ ' + notes.length + ' notitie(s) geladen');
+    setStatus('\u2705 ' + notes.length + ' notitie(s) geladen');
   } catch(e) {
     document.getElementById('notes-loading').style.display = 'none';
-    setStatus('❌ Fout: ' + e.message);
+    setStatus('\u274C Laad fout: ' + e.message);
   }
+}
+
+async function getAllNotes() {
+  var resp = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
+  var data = await resp.json();
+  return (data.record && data.record.notes) ? data.record.notes : [];
+}
+
+async function saveAllNotes(notes) {
+  await fetch(BIN_URL, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+    body: JSON.stringify({ notes: notes })
+  });
 }
 
 async function submitNote() {
@@ -3643,23 +3742,32 @@ async function submitNote() {
   var msg = document.getElementById('note-save-msg');
   msg.textContent = 'Opslaan...'; msg.style.display='inline'; msg.style.color='#8b949e';
   try {
-    var key = editingKey || ('note:' + currentUser + ':' + Date.now());
-    var note = { title:title||'Naamloos', body:body, tag:tag, author:currentUser,
-                 ts:Date.now(), date:new Date().toLocaleString('nl-NL') };
-    await window.storage.set(key, JSON.stringify(note), true);
-    msg.textContent = '✅ Opgeslagen!'; msg.style.color='#3fb950';
+    var notes = await getAllNotes();
+    var key   = editingKey || (currentUser + '_' + Date.now());
+    var note  = { _key:key, title:title||'Naamloos', body:body, tag:tag,
+                  author:currentUser, ts:Date.now(), date:new Date().toLocaleString('nl-NL') };
+    if (editingKey) {
+      notes = notes.map(function(n){ return n._key === editingKey ? note : n; });
+    } else {
+      notes.unshift(note);
+    }
+    await saveAllNotes(notes);
+    msg.textContent = '\u2705 Opgeslagen!'; msg.style.color='#3fb950';
     cancelEdit();
     loadNotes();
     setTimeout(function(){ msg.style.display='none'; }, 2500);
   } catch(e) {
-    msg.textContent = '❌ Fout: ' + e.message; msg.style.color='#ff6b6b';
+    msg.textContent = '\u274C Fout: ' + e.message; msg.style.color='#ff6b6b';
   }
 }
 
 async function deleteNote(key) {
   if (!confirm('Notitie verwijderen?')) return;
-  try { await window.storage.delete(key, true); loadNotes(); }
-  catch(e) { alert('Fout: ' + e.message); }
+  try {
+    var notes = await getAllNotes();
+    await saveAllNotes(notes.filter(function(n){ return n._key !== key; }));
+    loadNotes();
+  } catch(e) { alert('Fout: ' + e.message); }
 }
 
 function startEdit(note) {
@@ -3674,7 +3782,7 @@ function startEdit(note) {
 function cancelEdit() {
   document.getElementById('note-title').value = '';
   document.getElementById('note-body').value  = '';
-  document.getElementById('note-tag').value   = '📝 Algemeen';
+  document.getElementById('note-tag').value   = '\u{1F4DD} Algemeen';
   editingKey = null;
 }
 
@@ -3708,8 +3816,8 @@ function renderNotes(notes) {
       ? '<span style="font-size:10px;background:#facc1511;border:1px solid #facc1533;color:#facc15;padding:1px 7px;border-radius:10px;">jij</span>'
       : '<span style="font-size:10px;color:#8b949e;">door <strong>' + (note.author||'?') + '</strong></span>';
     var editBtn = isOwn
-      ? '<button data-key="' + note._key + '" class="note-edit-btn" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;">✏️ Bewerk</button>'
-        + '<button data-key="' + note._key + '" class="note-del-btn" style="background:#2a1a1a;border:1px solid #ff6b6b44;color:#ff6b6b;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;">🗑️ Verwijder</button>'
+      ? '<button data-key="' + note._key + '" class="note-edit-btn" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;">\u270f\ufe0f Bewerk</button>'
+        + '<button data-key="' + note._key + '" class="note-del-btn" style="background:#2a1a1a;border:1px solid #ff6b6b44;color:#ff6b6b;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;">\u{1F5D1}\ufe0f Verwijder</button>'
       : '';
     card.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;flex-wrap:wrap;">' +
@@ -3722,15 +3830,13 @@ function renderNotes(notes) {
       '</div>' +
       '<div style="font-size:12.5px;color:#c9d1d9;font-family:JetBrains Mono,monospace;white-space:pre-wrap;line-height:1.6;background:#0d1117;border-radius:6px;padding:10px;margin-bottom:6px;">' + bodyHtml + '</div>' +
       '<div style="font-size:11px;color:#484f58;">' + note.date + '</div>';
-    // Store full note data on card for edit
     card._noteData = note;
     list.appendChild(card);
   });
-  // Attach event listeners after render
   list.querySelectorAll('.note-edit-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
-      var noteCard = btn.closest('div[style]');
-      if (noteCard && noteCard._noteData) startEdit(noteCard._noteData);
+      var nc = btn.closest('div[style]');
+      if (nc && nc._noteData) startEdit(nc._noteData);
     });
   });
   list.querySelectorAll('.note-del-btn').forEach(function(btn){
