@@ -125,7 +125,6 @@
 <div class="tabbar">
   <button class="tab-btn may8 active"  onclick="switchTab('may8')">🗓️ 8 mei &nbsp;— Python · SQL · PowerShell</button>
   <button class="tab-btn may22"        onclick="switchTab('may22')">🗓️ 22 mei — DataCom · Cisco</button>
-  <button class="tab-btn notes"        onclick="switchTab('notes')" style="color:#facc15;opacity:.5;">📓 Mijn Notities</button>
 </div>
 
 <!-- ── SUBNAV (shown per tab) ── -->
@@ -138,9 +137,6 @@
 </div>
 <div class="subnav" id="subnav-may22" style="display:none">
   <a href="#datacom" class="dc" onclick="switchTab('may22')">🌐 DataCom / Cisco</a>
-</div>
-<div class="subnav" id="subnav-notes" style="display:none">
-  <span style="color:#facc15;font-weight:700;font-size:12px;padding:3px 4px;">📓 Persoonlijke notities — alleen zichtbaar in jouw browser</span>
 </div>
 
 <!-- ── SEARCH ── -->
@@ -161,6 +157,103 @@
 
 <!-- ════════════════════════════════════════════════════════ PYTHON -->
 <div class="section-title py" id="python">🐍 Python — Volledige Referentie</div>
+
+<h3>🚨 Veelgemaakte fouten &amp; IJzeren regels — Python</h3>
+<div class="grid">
+<div class="card">
+<h4>Syntaxregels die je NOOIT mag vergeten</h4>
+<table>
+<tr><th>Regel</th><th>Goed ✅</th><th>Fout ❌</th></tr>
+<tr><td><strong>Na <code>else</code> komt NOOIT een voorwaarde</strong></td><td><code>else:</code></td><td><code>else x > 5:</code></td></tr>
+<tr><td><strong>Na <code>else</code> komt ALTIJD een dubbele punt</strong></td><td><code>else:</code></td><td><code>else</code></td></tr>
+<tr><td><strong><code>elif</code> = "anders als"</strong> — wél een voorwaarde</td><td><code>elif x > 5:</code></td><td><code>elif:</code></td></tr>
+<tr><td><strong>Inspringen is verplicht</strong> — 4 spaties of 1 tab</td><td><code>    print("ok")</code></td><td><code>print("ok")</code> na if</td></tr>
+<tr><td><strong><code>input()</code> geeft altijd een string terug</strong></td><td><code>int(input(...))</code></td><td><code>input(...) + 1</code></td></tr>
+<tr><td><strong>Vergelijken = <code>==</code>, toewijzen = <code>=</code></strong></td><td><code>if x == 5:</code></td><td><code>if x = 5:</code></td></tr>
+<tr><td><strong><code>range()</code> stopt VOOR het laatste getal</strong></td><td><code>range(1,6)</code> = 1 t/m 5</td><td><code>range(1,5)</code> ≠ 1 t/m 5</td></tr>
+<tr><td><strong>Index begint bij 0</strong></td><td><code>lijst[0]</code> = eerste</td><td><code>lijst[1]</code> = tweede!</td></tr>
+</table>
+</div>
+<div class="card">
+<h4>Veelgemaakte fouten met uitleg</h4>
+<pre># ❌ FOUT — else met voorwaarde:
+if x > 10:
+    print("groot")
+else x > 5:       # SyntaxError! else krijgt NOOIT een voorwaarde
+    print("middel")
+
+# ✅ GOED — elif voor extra voorwaarden:
+if x > 10:
+    print("groot")
+elif x > 5:       # elif = "anders als" — wél een voorwaarde
+    print("middel")
+else:             # else = "in alle andere gevallen" — NOOIT een voorwaarde
+    print("klein")
+
+# ❌ FOUT — vergeten int() bij input:
+leeftijd = input("Leeftijd: ")
+if leeftijd >= 18:    # TypeError! Je vergelijkt string met getal
+    print("Volwassen")
+
+# ✅ GOED:
+leeftijd = int(input("Leeftijd: "))
+if leeftijd >= 18:
+    print("Volwassen")
+
+# ❌ FOUT — = in plaats van == bij vergelijken:
+if x = 5:    # SyntaxError!
+# ✅ GOED:
+if x == 5:   # == is vergelijken, = is toewijzen</pre>
+</div>
+</div>
+<div class="grid">
+<div class="card">
+<h4>Inspringen (indentation) — de meest gemaakte fout</h4>
+<pre># ❌ FOUT — geen inspringen na if:
+if x > 5:
+print("groot")     # IndentationError!
+
+# ❌ FOUT — inconsistent inspringen:
+if x > 5:
+    print("groot")
+  print("ook groot")  # IndentationError! (2 vs 4 spaties)
+
+# ✅ GOED — altijd 4 spaties (of 1 tab, maar kies één stijl!):
+if x > 5:
+    print("groot")
+    print("ja echt groot")
+
+# Alles wat bij de if/else/for/while hoort moet inspringen!
+for i in range(5):
+    print(i)        # hoort bij de for
+    if i == 3:
+        print("drie!")  # hoort bij de if, dus dubbel ingesprongen
+print("klaar")      # hoort NIET bij de for (geen inspring)</pre>
+</div>
+<div class="card">
+<h4>Wachtwoordgenerator (van klasgenoot) — random.choices + join</h4>
+<pre>import random
+
+capitals   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+lowercases = "abcdefghijklmnopqrstuvwxyz"
+numbers    = "0123456789"
+symbols    = "!@#$%^&*()"
+
+part1 = random.choices(capitals,   k=3)  # 3 hoofdletters
+part2 = random.choices(lowercases, k=3)  # 3 kleine letters
+part3 = random.choices(numbers,    k=2)  # 2 cijfers
+part4 = random.choices(symbols,    k=4)  # 4 symbolen
+
+tekens = part1 + part2 + part3 + part4  # alles samenvoegen
+random.shuffle(tekens)                  # willekeurige volgorde
+wachtwoord = "".join(tekens)            # lijst → één string
+print(wachtwoord)  # bijv: F@9aB2!x#Qm%
+
+# join() uitgelegd:
+# "".join(["a","b","c"]) → "abc"   (geen scheidingsteken)
+# "-".join(["a","b","c"]) → "a-b-c" (streepje ertussen)</pre>
+</div>
+</div>
 
 <h3>Variabelen &amp; Datatypes</h3>
 <div class="grid">
@@ -777,7 +870,51 @@ os.remove("bestand.txt")        # bestand verwijderen</pre>
 <!-- ════════════════════════════════════════════════════════ SQL -->
 <div class="section-title sql" id="sql">🗄️ SQL / Northwind — Eerste 30 Oefenvragen</div>
 
+<div class="warn-box" style="margin-bottom:4px;font-size:13px;">📌 <strong>Eerste regel bij elk SQL-examen: typ altijd als eerste <code>USE northwind;</code> en voer hem uit!</strong> Zonder dit werk je mogelijk in de verkeerde database.</div>
+
+<h3>🚨 Veelgemaakte fouten &amp; IJzeren regels — SQL</h3>
+<div class="grid">
+<div class="card">
+<h4>Regels die je NOOIT mag vergeten</h4>
+<table>
+<tr><th>Regel</th><th>Goed ✅</th><th>Fout ❌</th></tr>
+<tr><td><strong>Tekst tussen <code>'</code> enkele quotes</strong></td><td><code>'Germany'</code></td><td><code>"Germany"</code> of <code>Germany</code></td></tr>
+<tr><td><strong>Datum altijd <code>'JJJJ-MM-DD'</code></strong></td><td><code>'1996-05-21'</code></td><td><code>'21-05-1996'</code></td></tr>
+<tr><td><strong>Getallen NOOIT in quotes</strong></td><td><code>WHERE ID = 5</code></td><td><code>WHERE ID = '5'</code></td></tr>
+<tr><td><strong>NULL vergelijken met <code>IS NULL</code></strong></td><td><code>WHERE Fax IS NULL</code></td><td><code>WHERE Fax = NULL</code></td></tr>
+<tr><td><strong>WHERE vóór groeperen, HAVING erna</strong></td><td><code>GROUP BY ... HAVING COUNT(*) > 2</code></td><td><code>WHERE COUNT(*) > 2</code></td></tr>
+<tr><td><strong>WHERE mag GEEN aggregaties</strong></td><td><code>HAVING COUNT(*) > 2</code></td><td><code>WHERE COUNT(*) > 2</code></td></tr>
+<tr><td><strong>JOIN altijd met ON</strong></td><td><code>JOIN orders ON c.CustomerID = o.CustomerID</code></td><td><code>JOIN orders</code> (geen ON)</td></tr>
+<tr><td><strong>Meerdere tabellen → altijd alias gebruiken</strong></td><td><code>c.ContactName</code></td><td><code>ContactName</code> (ambiguous!)</td></tr>
+<tr><td><strong>SELECT-kolommen zonder aggregatie → in GROUP BY</strong></td><td><code>GROUP BY CustomerID, CompanyName</code></td><td>CompanyName weglaten</td></tr>
+</table>
+</div>
+<div class="card">
+<h4>WHERE vs HAVING — het verschil</h4>
+<div class="note">💡 Vraag jezelf altijd af: wil ik filteren <strong>vóór</strong> het tellen (→ WHERE) of <strong>ná</strong> het tellen (→ HAVING)?</div>
+<table>
+<tr><th>Kenmerk</th><th>WHERE</th><th>HAVING</th></tr>
+<tr><td>Wanneer?</td><td>Vóór GROUP BY</td><td>Ná GROUP BY</td></tr>
+<tr><td>Filtert...</td><td>Individuele rijen</td><td>Groepen</td></tr>
+<tr><td>Mag COUNT/SUM/AVG?</td><td><strong>Nee ❌</strong></td><td><strong>Ja ✅</strong></td></tr>
+</table>
+<pre>-- ❌ FOUT:
+WHERE COUNT(*) > 2     -- mag niet bij WHERE!
+
+-- ✅ GOED:
+GROUP BY City
+HAVING COUNT(*) > 2    -- filtert ná groeperen
+
+-- ✅ Beide tegelijk:
+WHERE OrderDate > '1996-01-01'  -- rijen filteren VOOR
+GROUP BY City
+HAVING COUNT(*) > 2             -- groepen filteren NA</pre>
+</div>
+</div>
+
 <div class="note">📌 De docent zei: de eerste 30 vragen zijn het belangrijkste! Hieronder staan alle 30 uitgewerkt met de bijbehorende SQL-query's.</div>
+
+
 
 <h3>SQL Basis — Snel Overzicht</h3>
 <div class="grid">
@@ -1744,6 +1881,51 @@ ROLLBACK; -- iets ging mis → draai alles terug</pre>
 <!-- ════════════════════════════════════════════════════════ POWERSHELL -->
 <div class="section-title ps" id="powershell">🐚 PowerShell — Volledige Referentie</div>
 
+<h3>🚨 Veelgemaakte fouten &amp; IJzeren regels — PowerShell</h3>
+<div class="grid">
+<div class="card">
+<h4>Regels die je NOOIT mag vergeten</h4>
+<table>
+<tr><th>Regel</th><th>Goed ✅</th><th>Fout ❌</th></tr>
+<tr><td><strong>Variabelen beginnen ALTIJD met <code>$</code></strong></td><td><code>$naam = "Jan"</code></td><td><code>naam = "Jan"</code></td></tr>
+<tr><td><strong>Na <code>else</code> NOOIT een voorwaarde</strong></td><td><code>} else {</code></td><td><code>} else $x -gt 5 {</code></td></tr>
+<tr><td><strong>Accolades <code>{ }</code> zijn verplicht</strong></td><td><code>if ($x) { ... }</code></td><td><code>if ($x) ...</code></td></tr>
+<tr><td><strong>Vergelijken met <code>-eq</code> niet met <code>=</code> of <code>==</code></strong></td><td><code>$x -eq 5</code></td><td><code>$x == 5</code></td></tr>
+<tr><td><strong>Boolean is <code>$true</code> / <code>$false</code></strong></td><td><code>$gevonden = $true</code></td><td><code>$gevonden = true</code></td></tr>
+<tr><td><strong>Dubbele quotes voor variabelen in strings</strong></td><td><code>"Hallo $naam"</code></td><td><code>'Hallo $naam'</code> (letterlijk!)</td></tr>
+<tr><td><strong><code>Write-Host</code> vs <code>Write-Output</code></strong></td><td><code>Write-Host</code> = scherm, <code>Write-Output</code> = pipeline</td><td>Door elkaar gebruiken</td></tr>
+<tr><td><strong>Type omzetten met blokhaken</strong></td><td><code>[int]$getal</code> of <code>[int]"5"</code></td><td><code>int($getal)</code></td></tr>
+</table>
+</div>
+<div class="card">
+<h4>Veelgemaakte fouten met voorbeelden</h4>
+<pre># ❌ FOUT — vergeten $ voor variabele:
+naam = "Jan"     # wordt niet herkend als variabele!
+# ✅ GOED:
+$naam = "Jan"
+
+# ❌ FOUT — verkeerde vergelijkingsoperator:
+if ($score == 5.5) { }   # werkt niet in PowerShell
+if ($score = 5.5)  { }   # dit is een toewijzing, geen vergelijking!
+# ✅ GOED:
+if ($score -ge 5.5) { Write-Host "Voldoende" }
+
+# ❌ FOUT — enkele quotes bij variabele in string:
+$naam = "Bastiaan"
+Write-Host 'Hallo $naam'   # toont letterlijk: Hallo $naam
+# ✅ GOED — dubbele quotes:
+Write-Host "Hallo $naam"   # toont: Hallo Bastiaan
+
+# ❌ FOUT — geen accolades bij if:
+if ($x -gt 5)
+    Write-Host "groot"     # SyntaxError!
+# ✅ GOED:
+if ($x -gt 5) {
+    Write-Host "groot"
+}</pre>
+</div>
+</div>
+
 <h3>Basisprincipes &amp; Variabelen</h3>
 <div class="grid">
 <div class="card">
@@ -1995,16 +2177,29 @@ foreach ($rij in $data) {
 <h3>Stroomdiagram Symbolen — Verplicht te kennen</h3>
 <div class="grid">
 <div class="card">
-<h4>De standaardsymbolen</h4>
+<h4>De standaardsymbolen + verplichte kleuren</h4>
 <table>
-<tr><th>Symbool</th><th>Vorm</th><th>Gebruik</th></tr>
-<tr><td><strong>Start / Einde</strong></td><td>Afgeronde rechthoek (ovaal)</td><td>Begin en einde van het proces. Altijd precies 1 start en minstens 1 einde.</td></tr>
-<tr><td><strong>Proces / Actie</strong></td><td>Rechthoek □</td><td>Een stap die uitgevoerd wordt. Bijv: "Lees bestand", "Schrijf naar CSV", "Stel variabele in"</td></tr>
-<tr><td><strong>Beslissing</strong></td><td>Ruit ◇</td><td>Een ja/nee vraag. Heeft ALTIJD twee uitgangen: Ja en Nee (of True/False)</td></tr>
-<tr><td><strong>In- / Uitvoer</strong></td><td>Parallellogram ▱</td><td>Input van gebruiker (Read-Host / input()) of output naar scherm/bestand</td></tr>
-<tr><td><strong>Pijl</strong></td><td>→</td><td>Verbindt stappen, toont de richting. Altijd één richting!</td></tr>
-<tr><td><strong>Connector</strong></td><td>Cirkel met letter</td><td>Verbindingspunt als het diagram te groot wordt voor één pagina</td></tr>
+<tr><th>Symbool</th><th>Vorm</th><th>Kleur</th><th>Gebruik</th></tr>
+<tr><td><strong>Start / Einde</strong></td><td>Afgeronde rechthoek (ovaal)</td><td style="color:#a0a8b8">⬜ Wit / Lichtgrijs</td><td>Begin en einde. Altijd precies 1 start en minstens 1 einde.</td></tr>
+<tr><td><strong>Proces / Actie</strong></td><td>Rechthoek □</td><td style="color:#4ec9b0">🟦 Blauw</td><td>Een stap die uitgevoerd wordt. Bijv: "Lees bestand", "Stel variabele in"</td></tr>
+<tr><td><strong>Beslissing</strong></td><td>Ruit ◇</td><td style="color:#f7c948">🟨 Geel</td><td>Een ja/nee vraag. Heeft ALTIJD twee uitgangen: Ja en Nee</td></tr>
+<tr><td><strong>In- / Uitvoer</strong></td><td>Parallellogram ▱</td><td style="color:#569cd6">🟦 Lichtblauw / Paars</td><td>Input van gebruiker of output naar scherm/bestand</td></tr>
+<tr><td><strong>Pijl</strong></td><td>→</td><td style="color:#8b949e">→ Zwart/Donker</td><td>Verbindt stappen. Altijd één richting!</td></tr>
 </table>
+<div class="note" style="margin-top:10px">🎨 <strong>Kleuren in draw.io instellen:</strong> klik een blok aan → rechtsklik → "Edit Style" → verander <code>fillColor=#dae8fc</code> (blauw), <code>fillColor=#fff2cc</code> (geel), <code>fillColor=#d5e8d4</code> (groen). Of selecteer een blok en gebruik het verfemmer-icoontje in de toolbar.</div>
+</div>
+<div class="card">
+<h4>Kleurenguide — samenvatting voor het examen</h4>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+  <div style="background:#fff2cc;border:2px solid #d6b656;border-radius:6px;padding:8px 12px;color:#333;font-weight:700;font-size:13px;">🟨 GEEL — Beslissing (Ruit) — Ja/Nee vraag</div>
+  <div style="background:#dae8fc;border:2px solid #6c8ebf;border-radius:6px;padding:8px 12px;color:#333;font-weight:700;font-size:13px;">🟦 BLAUW — Proces/Actie (Rechthoek) — Computer doet iets</div>
+  <div style="background:#d5e8d4;border:2px solid #82b366;border-radius:6px;padding:8px 12px;color:#333;font-weight:700;font-size:13px;">🟩 GROEN — In/Uitvoer (Parallellogram) — Gebruiker typt / scherm toont</div>
+  <div style="background:#f8cecc;border:2px solid #b85450;border-radius:6px;padding:8px 12px;color:#333;font-weight:700;font-size:13px;">🟥 ROOD — Foutmelding of stoppen (Break/Exit)</div>
+  <div style="background:#e1d5e7;border:2px solid #9673a6;border-radius:6px;padding:8px 12px;color:#333;font-weight:700;font-size:13px;">🟣 PAARS — Lus/Herhaling (For/While header)</div>
+  <div style="background:#f5f5f5;border:2px solid #666;border-radius:12px;padding:8px 12px;color:#333;font-weight:700;font-size:13px;">⬜ GRIJS — Start / Einde (Ovaal)</div>
+</div>
+<div class="warn-box" style="margin-top:10px">⚠️ Gebruik in draw.io de <strong>ingebouwde flowchart-vormen</strong> — die hebben al de juiste shape. Zoek links in het paneel op "flowchart" of "process".</div>
+</div>
 </div>
 <div class="card">
 <h4>Regels voor een correct diagram</h4>
@@ -3530,6 +3725,96 @@ Router# no debug all      # debug uitschakelen</pre>
 </div>
 </div>
 
+<h3>NAT — Network Address Translation</h3>
+<div class="grid">
+<div class="card">
+<h4>NAT configureren op de router</h4>
+<pre># NAT vertaalt privé IP-adressen naar één publiek IP-adres
+# Zodat het interne netwerk naar internet kan
+
+# Stap 1: ACL aanmaken voor interne netwerken:
+Router(config)# access-list 1 permit 10.10.0.0 0.0.255.255
+
+# Stap 2: NAT koppelen aan de ACL + interface:
+Router(config)# ip nat inside source list 1 interface g0/0/0 overload
+
+# Stap 3: interfaces labelen (inside = intern, outside = internet):
+Router(config)# interface g0/0/1
+Router(config-if)# ip nat inside      # interne kant
+Router(config)# interface g0/0/0
+Router(config-if)# ip nat outside     # externe kant (naar ISP)
+
+# Controleer NAT:
+Router# show ip nat translations
+Router# show ip nat statistics</pre>
+</div>
+<div class="card">
+<h4>NAT uitgelegd</h4>
+<table>
+<tr><th>Term</th><th>Uitleg</th></tr>
+<tr><td><code>ip nat inside</code></td><td>Interface aan de interne (privé) kant</td></tr>
+<tr><td><code>ip nat outside</code></td><td>Interface aan de externe (internet) kant</td></tr>
+<tr><td><code>overload</code></td><td>PAT — meerdere privé-adressen delen één publiek IP</td></tr>
+<tr><td><code>ip nat inside source static</code></td><td>Statische NAT — één privé altijd naar één publiek IP</td></tr>
+</table>
+<pre># Statische NAT (bijv. voor een server):
+Router(config)# ip nat inside source static 10.10.30.10 86.0.0.5
+# → 10.10.30.10 wordt altijd vertaald naar 86.0.0.5
+
+# Default route naar ISP (nodig voor internet!):
+Router(config)# ip route 0.0.0.0 0.0.0.0 86.0.0.1</pre>
+</div>
+</div>
+
+<h3>Port Security — switchpoorten beveiligen</h3>
+<div class="grid">
+<div class="card">
+<h4>Port Security instellen</h4>
+<pre># Port Security beperkt welke MAC-adressen op een poort mogen
+
+# Poort moet eerst in access-mode staan:
+SW01-ARN(config)# interface fa0/4
+SW01-ARN(config-if)# switchport mode access
+
+# Port security inschakelen:
+SW01-ARN(config-if)# switchport port-security
+
+# Maximum aantal MAC-adressen (standaard = 1):
+SW01-ARN(config-if)# switchport port-security maximum 1
+
+# Sticky: onthoud automatisch het eerste MAC-adres:
+SW01-ARN(config-if)# switchport port-security mac-address sticky
+
+# Wat doen bij overtreding:
+SW01-ARN(config-if)# switchport port-security violation shutdown
+# shutdown  = poort gaat dicht (meest gebruikt)
+# restrict  = verkeer blokkeren, log bijhouden
+# protect   = verkeer blokkeren, geen log
+
+# Controleer port security:
+SW01-ARN# show port-security
+SW01-ARN# show port-security interface fa0/4
+
+# Geblokkeerde poort weer openen:
+SW01-ARN(config)# interface fa0/4
+SW01-ARN(config-if)# shutdown
+SW01-ARN(config-if)# no shutdown</pre>
+</div>
+<div class="card">
+<h4>Port Security uitgelegd</h4>
+<table>
+<tr><th>Commando</th><th>Uitleg</th></tr>
+<tr><td><code>switchport port-security</code></td><td>Schakel port security in op de poort</td></tr>
+<tr><td><code>maximum 1</code></td><td>Max 1 MAC-adres toegestaan (standaard)</td></tr>
+<tr><td><code>mac-address sticky</code></td><td>Onthoud eerste MAC automatisch</td></tr>
+<tr><td><code>violation shutdown</code></td><td>Poort dicht bij verkeerd MAC</td></tr>
+<tr><td><code>violation restrict</code></td><td>Blokkeer maar laat poort open</td></tr>
+<tr><td><code>show port-security</code></td><td>Overzicht van alle beveiligde poorten</td></tr>
+</table>
+<div class="note">💡 <strong>Sticky</strong> is het handigst: je hoeft het MAC-adres niet handmatig in te voeren. De switch onthoudt automatisch het eerste apparaat dat verbinding maakt en blokkeert daarna alles wat anders is.</div>
+</div>
+</div>
+
 <h3>Subnetting Snelreferentie</h3>
 <div class="grid">
 <div class="card">
@@ -3573,83 +3858,11 @@ Router# no debug all      # debug uitschakelen</pre>
 </div>
 </div>
 
-<!-- ══════════════ TAB: NOTITIES ══════════════ -->
-<div id="panel-notes" class="tab-panel">
-<div class="container">
-
-<div class="section-title" style="border-color:#facc15;color:#facc15;">📓 Gedeelde Notities</div>
-<div class="note">🌐 Notities worden <strong>online opgeslagen</strong> en zijn zichtbaar voor iedereen die de site gebruikt. Kies een gebruikersnaam — je kunt alleen <strong>jouw eigen</strong> notities bewerken en verwijderen. Ideaal om tijdens het examen elkaars aantekeningen te lezen!</div>
-
-<!-- LOGIN -->
-<div id="notes-login" class="card" style="padding:20px;max-width:480px;">
-  <h4 style="margin-bottom:12px;">👤 Kies je gebruikersnaam</h4>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <input id="login-name" type="text" placeholder="Bijv. emma, klaas, bubbelblub..."
-      style="flex:1;min-width:160px;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:8px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;"
-      onkeydown="if(event.key==='Enter')loginNotes()">
-    <button onclick="loginNotes()" style="background:#facc1522;border:1px solid #facc1566;color:#facc15;padding:8px 20px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;">Inloggen →</button>
-  </div>
-  <div id="login-err" style="color:#ff6b6b;font-size:12px;margin-top:8px;display:none;">Vul een gebruikersnaam in!</div>
-  <p style="color:#8b949e;font-size:12px;margin-top:10px;">Geen wachtwoord nodig. Je naam is genoeg om je eigen notities te beheren.</p>
-</div>
-
-<!-- MAIN NOTES UI (hidden until logged in) -->
-<div id="notes-main" style="display:none;">
-
-  <!-- user bar -->
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-    <span style="background:#facc1522;border:1px solid #facc1566;color:#facc15;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;" id="notes-username-badge"></span>
-    <button onclick="logoutNotes()" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">Wissel gebruiker</button>
-    <span style="color:#8b949e;font-size:12px;" id="notes-status"></span>
-  </div>
-
-  <!-- add note form -->
-  <h3>Notitie toevoegen</h3>
-  <div class="card" style="padding:16px;margin-bottom:16px;">
-    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
-      <input id="note-title" type="text" placeholder="Titel (bijv. SQL GROUP BY uitleg)"
-        style="flex:1;min-width:180px;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:8px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;">
-      <select id="note-tag" style="background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:8px 10px;border-radius:6px;font-family:'Syne',sans-serif;font-size:13px;outline:none;">
-        <option value="📝 Algemeen">📝 Algemeen</option>
-        <option value="🐍 Python">🐍 Python</option>
-        <option value="🗄️ SQL">🗄️ SQL</option>
-        <option value="🐚 PowerShell">🐚 PowerShell</option>
-        <option value="🌐 DataCom">🌐 DataCom</option>
-      </select>
-    </div>
-    <textarea id="note-body" rows="5" placeholder="Schrijf je notitie... tekst, code, wat je hebt geoefend — alles mag!"
-      style="width:100%;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:10px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;outline:none;resize:vertical;line-height:1.6;"></textarea>
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">
-      <button onclick="submitNote()" style="background:#facc1522;border:1px solid #facc1566;color:#facc15;padding:7px 18px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;">💾 Opslaan</button>
-      <button onclick="cancelEdit()" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;">✕ Leegmaken</button>
-      <span id="note-save-msg" style="font-size:12px;color:#3fb950;display:none;"></span>
-    </div>
-  </div>
-
-  <!-- filter + all notes -->
-  <h3>Alle notities <span id="notes-count" style="color:#8b949e;font-weight:400;font-size:12px;"></span></h3>
-  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-    <span style="font-size:12px;color:#8b949e;">Filter:</span>
-    <button onclick="setFilter('all')"          data-filter="all"          class="flt active-flt" style="background:#facc1522;border:1px solid #facc1566;color:#facc15;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;font-weight:700;">Alle</button>
-    <button onclick="setFilter('🐍 Python')"    data-filter="🐍 Python"    class="flt" style="background:#f7c94811;border:1px solid #f7c94844;color:#f7c948;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">🐍 Python</button>
-    <button onclick="setFilter('🗄️ SQL')"       data-filter="🗄️ SQL"       class="flt" style="background:#569cd611;border:1px solid #569cd644;color:#569cd6;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">🗄️ SQL</button>
-    <button onclick="setFilter('🐚 PowerShell')" data-filter="🐚 PowerShell" class="flt" style="background:#4ec9b011;border:1px solid #4ec9b044;color:#4ec9b0;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">🐚 PowerShell</button>
-    <button onclick="setFilter('🌐 DataCom')"   data-filter="🌐 DataCom"   class="flt" style="background:#ff9f4311;border:1px solid #ff9f4344;color:#ff9f43;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Syne',sans-serif;">🌐 DataCom</button>
-  </div>
-
-  <div id="notes-loading" style="color:#8b949e;font-size:13px;padding:24px;text-align:center;">⏳ Notities laden...</div>
-  <div id="notes-list" style="display:flex;flex-direction:column;gap:10px;"></div>
-
-</div><!-- /notes-main -->
-
-</div>
-</div>
-
 <script>
 
 // ── Tab switching ──────────────────────────────────────────────────────────
 function switchTab(name) {
-  ['may8','may22','notes'].forEach(function(t) {
+  ['may8','may22'].forEach(function(t) {
     var panel  = document.getElementById('panel-' + t);
     var subnav = document.getElementById('subnav-' + t);
     var btn    = document.querySelector('.tab-btn.' + t);
@@ -3664,186 +3877,6 @@ function switchTab(name) {
   document.getElementById('search-input').value = '';
   document.getElementById('search-count').textContent = '';
 }
-
-// ── Notes system — JSONBin.io gedeelde opslag ────────────────────────────
-var currentUser   = localStorage.getItem('notes-username') || null;
-var currentFilter = 'all';
-var editingKey    = null;
-var BIN_ID  = '6839f0ad8561e97a500f0e0b';
-var API_KEY = '$2a$10$s6nMeJTcSvobx6RFpVW6jOFJh2JE/z.eDXCRrkwJFjOKCbv7iYhUq';
-var BIN_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
-
-function loginNotes() {
-  var name = document.getElementById('login-name').value.trim().toLowerCase().replace(/\s+/g,'_');
-  if (!name) { document.getElementById('login-err').style.display='block'; return; }
-  document.getElementById('login-err').style.display='none';
-  currentUser = name;
-  localStorage.setItem('notes-username', name);
-  showNotesMain();
-  loadNotes();
-}
-
-function logoutNotes() {
-  currentUser = null;
-  localStorage.removeItem('notes-username');
-  document.getElementById('notes-main').style.display = 'none';
-  document.getElementById('notes-login').style.display = 'block';
-  document.getElementById('login-name').value = '';
-}
-
-function showNotesMain() {
-  document.getElementById('notes-login').style.display = 'none';
-  document.getElementById('notes-main').style.display  = 'block';
-  document.getElementById('notes-username-badge').textContent = '\u{1F464} ' + currentUser;
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  if (currentUser) { showNotesMain(); loadNotes(); }
-});
-
-async function loadNotes() {
-  setStatus('Laden...');
-  document.getElementById('notes-loading').style.display = 'block';
-  document.getElementById('notes-list').innerHTML = '';
-  try {
-    var resp = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
-    var data = await resp.json();
-    var notes = (data.record && data.record.notes) ? data.record.notes : [];
-    notes.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
-    document.getElementById('notes-loading').style.display = 'none';
-    document.getElementById('notes-count').textContent = '(' + notes.length + ' totaal)';
-    renderNotes(notes);
-    setStatus('\u2705 ' + notes.length + ' notitie(s) geladen');
-  } catch(e) {
-    document.getElementById('notes-loading').style.display = 'none';
-    setStatus('\u274C Laad fout: ' + e.message);
-  }
-}
-
-async function getAllNotes() {
-  var resp = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
-  var data = await resp.json();
-  return (data.record && data.record.notes) ? data.record.notes : [];
-}
-
-async function saveAllNotes(notes) {
-  await fetch(BIN_URL, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-    body: JSON.stringify({ notes: notes })
-  });
-}
-
-async function submitNote() {
-  var title = document.getElementById('note-title').value.trim();
-  var body  = document.getElementById('note-body').value.trim();
-  var tag   = document.getElementById('note-tag').value;
-  if (!title && !body) return;
-  var msg = document.getElementById('note-save-msg');
-  msg.textContent = 'Opslaan...'; msg.style.display='inline'; msg.style.color='#8b949e';
-  try {
-    var notes = await getAllNotes();
-    var key   = editingKey || (currentUser + '_' + Date.now());
-    var note  = { _key:key, title:title||'Naamloos', body:body, tag:tag,
-                  author:currentUser, ts:Date.now(), date:new Date().toLocaleString('nl-NL') };
-    if (editingKey) {
-      notes = notes.map(function(n){ return n._key === editingKey ? note : n; });
-    } else {
-      notes.unshift(note);
-    }
-    await saveAllNotes(notes);
-    msg.textContent = '\u2705 Opgeslagen!'; msg.style.color='#3fb950';
-    cancelEdit();
-    loadNotes();
-    setTimeout(function(){ msg.style.display='none'; }, 2500);
-  } catch(e) {
-    msg.textContent = '\u274C Fout: ' + e.message; msg.style.color='#ff6b6b';
-  }
-}
-
-async function deleteNote(key) {
-  if (!confirm('Notitie verwijderen?')) return;
-  try {
-    var notes = await getAllNotes();
-    await saveAllNotes(notes.filter(function(n){ return n._key !== key; }));
-    loadNotes();
-  } catch(e) { alert('Fout: ' + e.message); }
-}
-
-function startEdit(note) {
-  document.getElementById('note-title').value = note.title;
-  document.getElementById('note-body').value  = note.body;
-  document.getElementById('note-tag').value   = note.tag;
-  editingKey = note._key;
-  document.getElementById('note-title').scrollIntoView({behavior:'smooth',block:'center'});
-  document.getElementById('note-title').focus();
-}
-
-function cancelEdit() {
-  document.getElementById('note-title').value = '';
-  document.getElementById('note-body').value  = '';
-  document.getElementById('note-tag').value   = '\u{1F4DD} Algemeen';
-  editingKey = null;
-}
-
-function setFilter(f) {
-  currentFilter = f;
-  document.querySelectorAll('.flt').forEach(function(b){
-    b.style.fontWeight = b.getAttribute('data-filter') === f ? '700' : '400';
-  });
-  loadNotes();
-}
-
-function setStatus(s) {
-  var el = document.getElementById('notes-status');
-  if (el) el.textContent = s;
-}
-
-function renderNotes(notes) {
-  var list = document.getElementById('notes-list');
-  list.innerHTML = '';
-  var filtered = currentFilter === 'all' ? notes : notes.filter(function(n){ return n.tag === currentFilter; });
-  if (!filtered.length) {
-    list.innerHTML = '<div style="color:#8b949e;font-size:13px;padding:24px;text-align:center;">Geen notities gevonden.</div>';
-    return;
-  }
-  filtered.forEach(function(note) {
-    var isOwn = note.author === currentUser;
-    var card  = document.createElement('div');
-    card.style.cssText = 'background:#161b22;border:1px solid ' + (isOwn ? '#facc1533' : '#30363d') + ';border-radius:10px;padding:14px;';
-    var bodyHtml = (note.body||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-    var isOwnBadge = isOwn
-      ? '<span style="font-size:10px;background:#facc1511;border:1px solid #facc1533;color:#facc15;padding:1px 7px;border-radius:10px;">jij</span>'
-      : '<span style="font-size:10px;color:#8b949e;">door <strong>' + (note.author||'?') + '</strong></span>';
-    var editBtn = isOwn
-      ? '<button data-key="' + note._key + '" class="note-edit-btn" style="background:#21262d;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;">\u270f\ufe0f Bewerk</button>'
-        + '<button data-key="' + note._key + '" class="note-del-btn" style="background:#2a1a1a;border:1px solid #ff6b6b44;color:#ff6b6b;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;">\u{1F5D1}\ufe0f Verwijder</button>'
-      : '';
-    card.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;flex-wrap:wrap;">' +
-        '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
-          '<span style="font-size:11px;background:#21262d;border-radius:4px;padding:2px 8px;color:#8b949e;">' + note.tag + '</span>' +
-          '<strong style="font-size:14px;color:#e6edf3;">' + (note.title||'').replace(/</g,'&lt;') + '</strong>' +
-          isOwnBadge +
-        '</div>' +
-        '<div style="display:flex;gap:6px;">' + editBtn + '</div>' +
-      '</div>' +
-      '<div style="font-size:12.5px;color:#c9d1d9;font-family:JetBrains Mono,monospace;white-space:pre-wrap;line-height:1.6;background:#0d1117;border-radius:6px;padding:10px;margin-bottom:6px;">' + bodyHtml + '</div>' +
-      '<div style="font-size:11px;color:#484f58;">' + note.date + '</div>';
-    card._noteData = note;
-    list.appendChild(card);
-  });
-  list.querySelectorAll('.note-edit-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var nc = btn.closest('div[style]');
-      if (nc && nc._noteData) startEdit(nc._noteData);
-    });
-  });
-  list.querySelectorAll('.note-del-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){ deleteNote(btn.dataset.key); });
-  });
-}
-
 
 // ── Search ─────────────────────────────────────────────────────────────────
 var matches = [], cur = 0;
