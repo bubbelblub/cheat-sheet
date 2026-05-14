@@ -123,19 +123,19 @@
 
 <!-- ── TAB BAR ── -->
 <div class="tabbar">
-  <button class="tab-btn may8 active"  onclick="switchTab('may8')">🗓️ 8 mei &nbsp;— Python · SQL · PowerShell</button>
-  <button class="tab-btn may22"        onclick="switchTab('may22')">🗓️ 22 mei — DataCom · Cisco</button>
+  <button class="tab-btn may22 active" onclick="switchTab('may22')">🌐 DataCom · Cisco — Examen</button>
+  <button class="tab-btn may8"         onclick="switchTab('may8')" style="opacity:.5;">📚 Python · SQL · PowerShell</button>
 </div>
 
 <!-- ── SUBNAV (shown per tab) ── -->
-<div class="subnav" id="subnav-may8">
+<div class="subnav" id="subnav-may8" style="display:none">
   <a href="#python"     class="py"  onclick="switchTab('may8')">🐍 Python</a>
   <a href="#sql"        class="sql" onclick="switchTab('may8')">🗄️ SQL / Northwind</a>
   <a href="#powershell"    class="ps"  onclick="switchTab('may8')">🐚 PowerShell</a>
   <a href="#stroomdiagram" style="color:#e879f9;font-weight:700;padding:3px 11px;border-radius:6px;font-size:12px;text-decoration:none;" onclick="switchTab('may8')">📊 Stroomdiagram</a>
   <a href="#documentatie"  style="color:#38bdf8;font-weight:700;padding:3px 11px;border-radius:6px;font-size:12px;text-decoration:none;" onclick="switchTab('may8')">📝 Documenteren</a>
 </div>
-<div class="subnav" id="subnav-may22" style="display:none">
+<div class="subnav" id="subnav-may22">
   <a href="#datacom" class="dc" onclick="switchTab('may22')">🌐 DataCom / Cisco</a>
 </div>
 
@@ -152,7 +152,7 @@
 </div>
 
 <!-- ══════════════ TAB: 8 MEI ══════════════ -->
-<div id="panel-may8" class="tab-panel active">
+<div id="panel-may8" class="tab-panel">
 <div class="container">
 
 <!-- ════════════════════════════════════════════════════════ PYTHON -->
@@ -2690,13 +2690,491 @@ amount = min(bedragen)
 </div>
 
 <!-- ══════════════ TAB: 22 MEI ══════════════ -->
-<div id="panel-may22" class="tab-panel">
+<div id="panel-may22" class="tab-panel active">
 <div class="container">
 
 <!-- ════════════════════════════════════════════════════════ DATACOM / CISCO -->
 <div class="section-title dc" id="datacom">🌐 DataCom / Cisco — Netwerken &amp; Packet Tracer</div>
 
-<div class="note">📌 Dit is jouw examen: Solar Plex Network — Arnhem locatie configureren. Hieronder staan ALLE benodigde commando's in de volgorde van de opdrachten.</div>
+<div class="warn-box" style="font-size:14px;margin-bottom:8px;">
+⚡ <strong>LEES DIT EERST!</strong> — Je hebt 6 uur. Volg de stappen hieronder van boven naar beneden. Bij elke stap staat precies welke commando's je intypt. Pas alleen de IP-adressen, VLAN-nummers en namen aan naar wat op jouw examen staat.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EXAMEN OVERLEVINGSGIDS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<h3>🗺️ Stap 0 — Lees het technisch ontwerp EERST (5 min)</h3>
+<div class="card">
+<h4>Voordat je ook maar 1 commando typt — doe dit:</h4>
+<table>
+<tr><th>Wat lezen</th><th>Wat noteren</th></tr>
+<tr><td>Netwerktopologie / tekening</td><td>Welke apparaten zijn er? (routers, switches, PC's, AP's)</td></tr>
+<tr><td>IP-adrestabel</td><td>Elk apparaat + zijn IP + subnetmask + gateway</td></tr>
+<tr><td>VLAN-tabel</td><td>VLAN-nummers + namen + welke PC's erin zitten</td></tr>
+<tr><td>Welk apparaat is de "core" switch?</td><td>Dit wordt VTP Server + DHCP server + STP root</td></tr>
+<tr><td>Welke poorten gaan naar andere switches?</td><td>Dit worden TRUNK poorten</td></tr>
+<tr><td>Welke poorten gaan naar PC's/printers?</td><td>Dit worden ACCESS poorten</td></tr>
+<tr><td>Zijn er WiFi access points?</td><td>SSID, wachtwoord, welk VLAN</td></tr>
+</table>
+<div class="note">💡 Maak een klein schetsje op papier: teken de apparaten en verbindingen. Dit bespaart veel tijd en voorkomt fouten.</div>
+</div>
+
+<h3>🔧 Stap 1 — Elk apparaat: basisconfiguratie (doe dit op ALLE switches/routers)</h3>
+<div class="card">
+<h4>Template — pas de naam aan voor elk apparaat</h4>
+<pre>! Klik op het apparaat in Packet Tracer → CLI tab → druk Enter
+
+enable                          ! naar privileged mode (#)
+conf t                          ! naar configuratie mode
+
+hostname Core01_ARN             ! ← AANPASSEN: naam uit het technisch ontwerp
+
+enable secret cisco             ! wachtwoord instellen (gebruik wat in ontwerp staat)
+service password-encryption     ! wachtwoorden versleutelen
+
+! Opslaan — doe dit na ELKE stap!
+end
+copy running-config startup-config
+! Druk Enter bij "Destination filename"</pre>
+<div class="warn-box">⚠️ <strong>Vergeet NOOIT</strong> aan het einde van elke stap: <code>end</code> → <code>copy running-config startup-config</code> → Enter</div>
+</div>
+
+<h3>🏗️ Stap 2 — Core switch: VLANs aanmaken + VTP instellen</h3>
+<div class="card">
+<h4>Alleen op de CORE switch (de "hoofdswitch" in het ontwerp)</h4>
+<pre>enable
+conf t
+
+! VTP instellen — core switch is de SERVER
+vtp mode server
+vtp domain SOLAR                ! ← AANPASSEN: domeinnaam uit ontwerp
+vtp version 2
+
+! VLANs aanmaken — gebruik de VLAN-tabel uit het ontwerp
+vlan 10
+ name Management                ! ← AANPASSEN
+vlan 20
+ name HR_Finance                ! ← AANPASSEN
+vlan 30
+ name Productie                 ! ← AANPASSEN
+vlan 40
+ name Marketing                 ! ← AANPASSEN
+vlan 50
+ name Gasten_Wifi               ! ← AANPASSEN
+exit
+
+! IP-routing aanzetten (VERPLICHT voor inter-VLAN communicatie!):
+ip routing
+
+end
+copy running-config startup-config</pre>
+</div>
+
+<h3>🔗 Stap 3 — Core switch: IP-adressen op VLANs</h3>
+<div class="card">
+<h4>Elk VLAN krijgt een IP — dit wordt de "gateway" voor dat VLAN</h4>
+<pre>enable
+conf t
+
+! Geef elk VLAN een IP-adres (uit de IP-tabel in het ontwerp)
+interface vlan 1
+ ip address 10.10.0.2 255.255.255.0  ! ← IP + mask uit ontwerp
+ no shutdown
+
+interface vlan 30
+ ip address 10.10.30.1 255.255.255.0 ! ← IP + mask uit ontwerp
+ no shutdown
+
+interface vlan 40
+ ip address 10.10.40.1 255.255.255.0 ! ← AANPASSEN
+ no shutdown
+
+interface vlan 50
+ ip address 10.10.50.1 255.255.255.0 ! ← AANPASSEN
+ no shutdown
+
+end
+copy running-config startup-config
+
+! Controleer — staan alle VLAN interfaces op UP?
+show ip interface brief
+! Zoek naar "Vlan30", "Vlan40" etc. — status moet "up" zijn</pre>
+</div>
+
+<h3>📡 Stap 4 — Core switch: trunk- en access-poorten</h3>
+<div class="card">
+<h4>Poorten naar andere SWITCHES = trunk. Poorten naar PC's/AP's = access.</h4>
+<pre>enable
+conf t
+
+! TRUNK poorten (verbindingen naar andere switches — uit topologie):
+interface fa0/1                      ! ← poortnummer uit ontwerp
+ switchport mode trunk
+ switchport trunk allowed vlan all
+ exit
+
+interface fa0/3                      ! ← poortnummer naar 2e switch
+ switchport mode trunk
+ switchport trunk allowed vlan all
+ exit
+
+! ACCESS poorten (naar AP of PC direct aan core):
+interface fa0/24                     ! ← poortnummer naar AP
+ switchport mode access
+ switchport access vlan 50           ! ← VLAN-nummer uit ontwerp
+ exit
+
+end
+copy running-config startup-config
+
+! Controleer trunk poorten:
+show interfaces trunk
+! Zie je de poorten staan? Staan de juiste VLANs erbij?</pre>
+</div>
+
+<h3>🔄 Stap 5 — Andere switches: VTP client + trunks + access</h3>
+<div class="card">
+<h4>Doe dit op ELKE andere switch (SW01, SW02 etc.)</h4>
+<pre>enable
+conf t
+
+! VTP client instellen (ontvangt VLANs automatisch van core):
+vtp mode client
+vtp domain SOLAR                ! ← ZELFDE domeinnaam als op core switch!
+vtp version 2
+
+! Trunk naar core switch:
+interface fa0/1                 ! ← poort richting core switch (uit topologie)
+ switchport mode trunk
+ switchport trunk allowed vlan all
+ exit
+
+! Trunk naar andere switches (als van toepassing):
+interface fa0/24
+ switchport mode trunk
+ switchport trunk allowed vlan all
+ exit
+
+! Access poorten naar PC's:
+interface fa0/4                 ! ← poortnummer uit ontwerp
+ switchport mode access
+ switchport access vlan 30      ! ← VLAN van deze PC uit ontwerp
+ exit
+
+interface fa0/5
+ switchport mode access
+ switchport access vlan 30
+ exit
+
+end
+copy running-config startup-config
+
+! Controleer — zijn de VLANs overgekomen van de core switch?
+show vlan brief
+! Zie je alle VLANs (30, 40, 50 etc.)? Dan werkt VTP!</pre>
+</div>
+
+<h3>🌐 Stap 6 — Core switch: DHCP instellen</h3>
+<div class="card">
+<h4>DHCP deelt automatisch IP-adressen uit aan PC's</h4>
+<pre>enable
+conf t
+
+! Eerst: reserveer IP's die NIET uitgedeeld mogen worden (servers, gateways etc.)
+ip dhcp excluded-address 10.10.30.1 10.10.30.50   ! ← aanpassen
+ip dhcp excluded-address 10.10.40.1 10.10.40.50   ! ← aanpassen
+ip dhcp excluded-address 10.10.50.1 10.10.50.50   ! ← aanpassen
+
+! Pool voor elk VLAN:
+ip dhcp pool vlan30
+ network 10.10.30.0 255.255.255.0   ! ← netwerk + mask uit ontwerp
+ default-router 10.10.30.1          ! ← gateway = IP van VLAN interface
+ dns-server 62.36.55.85             ! ← DNS-adres uit ontwerp
+ exit
+
+ip dhcp pool vlan40
+ network 10.10.40.0 255.255.255.0
+ default-router 10.10.40.1
+ dns-server 62.36.55.85
+ exit
+
+ip dhcp pool vlan50
+ network 10.10.50.0 255.255.255.0
+ default-router 10.10.50.1
+ dns-server 62.36.55.85
+ exit
+
+end
+copy running-config startup-config
+
+! Controleer — worden IP's uitgedeeld?
+show ip dhcp binding
+! Na verbinden van een PC zie je hier het IP-adres verschijnen</pre>
+</div>
+
+<h3>🌳 Stap 7 — Core switch: STP root instellen</h3>
+<div class="card">
+<h4>Core switch moet de "baas" zijn van het netwerk (root bridge)</h4>
+<pre">enable
+conf t
+
+! Maak core switch root voor alle VLANs:
+spanning-tree vlan 1 root primary
+spanning-tree vlan 10 root primary  ! ← herhaal voor elk VLAN uit ontwerp
+spanning-tree vlan 20 root primary
+spanning-tree vlan 30 root primary
+spanning-tree vlan 40 root primary
+spanning-tree vlan 50 root primary
+
+end
+copy running-config startup-config
+
+! Controleer:
+show spanning-tree vlan 30
+! Staat er "This bridge is the root"? Dan is het goed!</pre>
+</div>
+
+<h3>🗺️ Stap 8 — Router: OSPF routing instellen</h3>
+<div class="card">
+<h4>OSPF zorgt dat routers elkaar vinden en verkeer doorsturen</h4>
+<pre">enable
+conf t
+
+! OSPF aanzetten:
+router ospf 1
+ network 10.0.0.0 0.255.255.255 area 0   ! ← netwerk + wildcard uit ontwerp
+ exit
+
+! Default route naar internet (als er een ISP-router is):
+ip route 0.0.0.0 0.0.0.0 10.10.0.1      ! ← IP van volgende router/ISP
+
+end
+copy running-config startup-config
+
+! Controleer:
+show ip route
+! Zie je "O" routes? Dan werkt OSPF!
+show ip ospf neighbor
+! Zie je de buur-router? Dan is de verbinding goed!</pre>
+</div>
+
+<h3>🛡️ Stap 9 — ACL instellen (gasten blokkeren van intern netwerk)</h3>
+<div class="card">
+<h4>ACL 150 blokkeert gast-WiFi van interne netwerken</h4>
+<pre">enable
+conf t
+
+! Blokkeer gasten (VLAN 50) van alle interne netwerken:
+access-list 150 deny ip 10.10.50.0 0.0.0.255 10.10.30.0 0.0.0.255
+access-list 150 deny ip 10.10.50.0 0.0.0.255 10.10.40.0 0.0.0.255
+access-list 150 deny ip 10.10.50.0 0.0.0.255 172.16.10.0 0.0.0.255  ! ← aanpassen
+access-list 150 deny ip 10.10.50.0 0.0.0.255 172.16.5.0 0.0.0.255   ! ← aanpassen
+access-list 150 permit ip any any    ! ← VERPLICHT! Anders blokkeert alles!
+
+! ACL toepassen op gast-VLAN interface:
+interface vlan 50
+ ip access-group 150 in
+ exit
+
+end
+copy running-config startup-config
+
+! Controleer:
+show access-lists 150
+! Staan alle regels erin?</pre>
+<div class="warn-box">🚨 De laatste regel <code>permit ip any any</code> is ALTIJD verplicht! Zonder die regel blokkeert de ACL ook internet voor gasten.</div>
+</div>
+
+<h3>📶 Stap 10 — WiFi Access Points instellen (Packet Tracer)</h3>
+<div class="card">
+<h4>AP instellen via klikken in Packet Tracer</h4>
+<pre">STAP A — Klik op het Access Point in Packet Tracer
+STAP B — Klik op het tabblad "Config"
+STAP C — Klik links op "Port 0" (of het wireless interface)
+STAP D — Stel in:
+   SSID:            Solar_Arnhem    ← AANPASSEN naar naam uit ontwerp
+   Authentication:  WPA2-PSK
+   PSK Pass Phrase: solar12345      ← AANPASSEN naar wachtwoord uit ontwerp
+   SSID Broadcast:  Enabled
+
+! Als het AP in een VLAN moet:
+! Zorg dat de poort van de switch naar het AP een ACCESS poort is
+! met het juiste VLAN-nummer (zie Stap 4)
+
+LAPTOP verbinden met WiFi:
+   1. Klik op Laptop → Physical tab
+   2. Schakel laptop UIT (klik rode knop)
+   3. Sleep de huidige NIC-kaart eruit
+   4. Sleep "WPC300N" erin (wireless NIC)
+   5. Schakel laptop weer AAN
+   6. Klik op Desktop tab → PC Wireless
+   7. Connect tab → klik op jouw SSID → Connect
+   8. Voer wachtwoord in</pre>
+</div>
+
+<h3>✅ Stap 11 — Alles controleren (doe dit aan het einde!)</h3>
+<div class="card">
+<h4>Verifieer elk onderdeel — gebruik deze checklist</h4>
+<table>
+<tr><th>Wat controleren</th><th>Commando</th><th>Wat moet je zien?</th></tr>
+<tr><td>Poorten UP?</td><td><code>show ip interface brief</code></td><td>Status: up, Protocol: up</td></tr>
+<tr><td>VLANs aangemaakt?</td><td><code>show vlan brief</code></td><td>Alle VLANs zichtbaar met naam</td></tr>
+<tr><td>Trunk poorten werken?</td><td><code>show interfaces trunk</code></td><td>Poorten zichtbaar, VLANs toegestaan</td></tr>
+<tr><td>VTP gesynchroniseerd?</td><td><code>show vtp status</code></td><td>Juiste domain, juiste mode</td></tr>
+<tr><td>Core switch is root?</td><td><code>show spanning-tree</code></td><td>"This bridge is the root"</td></tr>
+<tr><td>DHCP deelt uit?</td><td><code>show ip dhcp binding</code></td><td>IP-adressen zichtbaar per PC</td></tr>
+<tr><td>Routing werkt?</td><td><code>show ip route</code></td><td>Alle netwerken zichtbaar</td></tr>
+<tr><td>ACL klopt?</td><td><code>show access-lists</code></td><td>Alle regels aanwezig</td></tr>
+<tr><td>Config opgeslagen?</td><td><code>show startup-config</code></td><td>Config zichtbaar (niet leeg)</td></tr>
+<tr><td>Ping test</td><td>PC → Desktop → Command Prompt → <code>ping 10.10.30.1</code></td><td>4 van 4 pings succesvol</td></tr>
+</table>
+<div class="note">💡 Als een ping mislukt: check in deze volgorde → 1) is het juiste VLAN ingesteld? 2) is de trunk-poort correct? 3) staat ip routing aan? 4) blokkeert een ACL het verkeer?</div>
+</div>
+
+<h3>🆘 Problemen oplossen — meest voorkomende fouten</h3>
+<div class="grid">
+<div class="card">
+<h4>PC krijgt geen IP-adres</h4>
+<pre">Oorzaak 1: ip routing staat uit
+  Fix: Core(config)# ip routing
+
+Oorzaak 2: VLAN interface staat DOWN
+  Fix: Core(config)# interface vlan 30
+       Core(config-if)# no shutdown
+
+Oorzaak 3: Access poort heeft verkeerd VLAN
+  Fix: SW(config)# interface fa0/4
+       SW(config-if)# switchport access vlan 30
+
+Oorzaak 4: Trunk poort werkt niet
+  Fix: SW(config)# interface fa0/1
+       SW(config-if)# switchport mode trunk
+       SW(config-if)# switchport trunk allowed vlan all</pre>
+</div>
+<div class="card">
+<h4>VLAN's staan niet op de andere switch</h4>
+<pre">Oorzaak 1: VTP domain naam klopt niet
+  Fix: zorg dat domain op ALLE switches EXACT hetzelfde is!
+  Check: show vtp status → VTP Domain Name
+
+Oorzaak 2: Trunk poort staat er niet aan
+  Fix: zorg dat verbinding tussen switches trunk is
+
+Oorzaak 3: VTP versie verschilt
+  Fix: zorg dat versie op alle switches gelijk is (bijv. versie 2)
+
+Test: show vlan brief op de client-switch
+  Zie je de VLANs van de server? Dan werkt VTP!</pre>
+</div>
+</div>
+<div class="grid">
+<div class="card">
+<h4>Ping werkt niet tussen VLANs</h4>
+<pre">Oorzaak 1: ip routing staat uit op de L3-switch
+  Fix: Core(config)# ip routing
+
+Oorzaak 2: Gateway bij PC is verkeerd
+  Als PC DHCP gebruikt → check dhcp pool default-router
+  Als PC vast IP heeft → check gateway instelling op PC
+
+Oorzaak 3: ACL blokkeert het verkeer
+  Fix: show access-lists → kijk of de wrong regel erin zit
+  Tijdelijk testen: verwijder ACL van interface
+  Core(config)# interface vlan 50
+  Core(config-if)# no ip access-group 150 in</pre>
+</div>
+<div class="card">
+<h4>Laptop verbindt niet met WiFi</h4>
+<pre">Oorzaak 1: Verkeerde NIC in laptop
+  Fix: Physical tab → schakel UIT → sleep NIC eruit
+       Sleep WPC300N (wireless) erin → schakel AAN
+
+Oorzaak 2: Verkeerd wachtwoord
+  Fix: check wachtwoord op AP (Config → Port 0 → PSK)
+
+Oorzaak 3: SSID Broadcast staat uit
+  Fix: AP → Config → Port 0 → SSID Broadcast: Enabled
+
+Oorzaak 4: Switch-poort naar AP is geen access poort
+  Fix: SW(config)# interface g0/1
+       SW(config-if)# switchport mode access
+       SW(config-if)# switchport access vlan 40</pre>
+</div>
+</div>
+
+<div class="note">📌 De rest van de pagina bevat alle commando's als naslagwerk. De stappen hierboven zijn genoeg voor het examen — gebruik de rest alleen als je meer detail nodig hebt.</div>
+
+
+
+<h3>⌨️ CLI Afkortingen — Volledig commando &amp; Verkorting</h3>
+<div class="grid">
+<div class="card">
+<h4>Modi wisselen</h4>
+<table>
+<tr><th>Volledig commando</th><th>Afkorting</th><th>Wat doet het?</th></tr>
+<tr><td><code>enable</code></td><td><code>en</code></td><td>Naar privileged mode (#)</td></tr>
+<tr><td><code>configure terminal</code></td><td><code>conf t</code></td><td>Naar global config mode</td></tr>
+<tr><td><code>interface FastEthernet0/1</code></td><td><code>int fa0/1</code></td><td>Naar interface config</td></tr>
+<tr><td><code>interface GigabitEthernet0/1</code></td><td><code>int g0/1</code></td><td>Naar gigabit interface</td></tr>
+<tr><td><code>interface vlan 30</code></td><td><code>int vlan 30</code></td><td>Naar VLAN interface</td></tr>
+<tr><td><code>interface range fa0/1-5</code></td><td><code>int range fa0/1-5</code></td><td>Meerdere poorten tegelijk</td></tr>
+<tr><td><code>exit</code></td><td><code>ex</code></td><td>Één niveau omhoog</td></tr>
+<tr><td><code>end</code></td><td><code>end</code></td><td>Direct terug naar # (Ctrl+Z doet hetzelfde)</td></tr>
+</table>
+</div>
+<div class="card">
+<h4>Show commando's</h4>
+<table>
+<tr><th>Volledig commando</th><th>Afkorting</th></tr>
+<tr><td><code>show running-config</code></td><td><code>sh run</code></td></tr>
+<tr><td><code>show startup-config</code></td><td><code>sh start</code></td></tr>
+<tr><td><code>show ip interface brief</code></td><td><code>sh ip int br</code></td></tr>
+<tr><td><code>show interfaces trunk</code></td><td><code>sh int trunk</code></td></tr>
+<tr><td><code>show vlan brief</code></td><td><code>sh vlan br</code></td></tr>
+<tr><td><code>show vtp status</code></td><td><code>sh vtp status</code></td></tr>
+<tr><td><code>show spanning-tree</code></td><td><code>sh span</code></td></tr>
+<tr><td><code>show ip route</code></td><td><code>sh ip route</code></td></tr>
+<tr><td><code>show ip dhcp binding</code></td><td><code>sh ip dhcp bind</code></td></tr>
+<tr><td><code>show access-lists</code></td><td><code>sh access-lists</code></td></tr>
+<tr><td><code>show cdp neighbors</code></td><td><code>sh cdp nei</code></td></tr>
+<tr><td><code>show mac address-table</code></td><td><code>sh mac add</code></td></tr>
+</table>
+</div>
+</div>
+<div class="grid">
+<div class="card">
+<h4>Configuratie commando's</h4>
+<table>
+<tr><th>Volledig commando</th><th>Afkorting</th></tr>
+<tr><td><code>copy running-config startup-config</code></td><td><code>copy run start</code> of <code>wr</code></td></tr>
+<tr><td><code>no shutdown</code></td><td><code>no shut</code></td></tr>
+<tr><td><code>switchport mode trunk</code></td><td><code>sw mo trunk</code></td></tr>
+<tr><td><code>switchport mode access</code></td><td><code>sw mo acc</code></td></tr>
+<tr><td><code>switchport access vlan 30</code></td><td><code>sw acc vlan 30</code></td></tr>
+<tr><td><code>switchport trunk allowed vlan all</code></td><td><code>sw trunk all vlan all</code></td></tr>
+<tr><td><code>ip address 10.10.30.1 255.255.255.0</code></td><td><code>ip add 10.10.30.1 255.255.255.0</code></td></tr>
+<tr><td><code>spanning-tree vlan 30 root primary</code></td><td><code>span vlan 30 root pri</code></td></tr>
+<tr><td><code>vtp mode server</code></td><td><code>vtp mo ser</code></td></tr>
+<tr><td><code>vtp mode client</code></td><td><code>vtp mo cli</code></td></tr>
+<tr><td><code>ip routing</code></td><td><code>ip routing</code> (geen afkorting)</td></tr>
+</table>
+</div>
+<div class="card">
+<h4>Handige CLI-trucjes</h4>
+<table>
+<tr><th>Truc</th><th>Uitleg</th></tr>
+<tr><td><code>Tab</code></td><td>Commando automatisch aanvullen</td></tr>
+<tr><td><code>?</code></td><td>Toon alle mogelijke opties op dit punt</td></tr>
+<tr><td><code>sh?</code></td><td>Toon alle commando's die beginnen met "sh"</td></tr>
+<tr><td><code>Pijl omhoog ↑</code></td><td>Vorig commando terugroepen</td></tr>
+<tr><td><code>Ctrl+Z</code></td><td>Direct terug naar # (zelfde als end)</td></tr>
+<tr><td><code>Ctrl+Shift+6</code></td><td>Stop vastgelopen commando (bijv. DNS lookup)</td></tr>
+<tr><td><code>no [commando]</code></td><td>Commando ongedaan maken — bijv. <code>no shutdown</code>, <code>no ip address</code></td></tr>
+</table>
+<div class="note">💡 Cisco accepteert elke afkorting zolang die <strong>uniek</strong> is. <code>conf t</code> werkt omdat geen ander commando begint met "conf t". Twijfel je? Druk op Tab om te zien of Cisco het herkent.</div>
+</div>
+</div>
 
 <h3>Cisco CLI — Modi &amp; Navigatie</h3>
 <div class="grid">
@@ -3116,8 +3594,47 @@ Core01_ARN(config)# no access-list 150</pre>
 </div>
 </div>
 
-<h3>Verificatie &amp; Troubleshooting Commando's</h3>
+<h3>Verificatie &amp; Troubleshooting — B1-K2-W2</h3>
+<div class="note">📌 <strong>B1-K2-W2 = Beheert en monitort.</strong> Dit gaat over controleren of alles werkt, problemen opsporen en oplossen. Gebruik de show-commando's om elk onderdeel te verifiëren NADAT je het geconfigureerd hebt.</div>
 <div class="grid">
+<div class="card">
+<h4>Verificatievolgorde na configuratie</h4>
+<pre># Na elke configuratiestap controleer je met show-commando's.
+# Gebruik deze volgorde:
+
+# 1. Zijn de poorten UP?
+show ip interface brief
+# STATUS moet "up", PROTOCOL moet "up" zijn
+# "administratively down" = no shutdown vergeten!
+
+# 2. Zijn de VLANs correct aangemaakt?
+show vlan brief
+# Alle VLANs zichtbaar? Juiste poorten erin?
+
+# 3. Werken de trunk-poorten?
+show interfaces trunk
+# Trunk-poorten zichtbaar? Juiste VLANs toegestaan?
+
+# 4. Klopt de VTP-synchronisatie?
+show vtp status
+# Domain SOLAR? Juiste mode (server/client)?
+
+# 5. Is STP correct? Wie is root?
+show spanning-tree vlan 30
+# "This bridge is the root" bij Core01_ARN?
+
+# 6. Klopt de routetabel?
+show ip route
+# C = direct connected, O = OSPF, S = statisch
+
+# 7. Worden DHCP-adressen uitgedeeld?
+show ip dhcp binding
+# PC's zichtbaar met IP-adres?
+
+# 8. Werkt de ACL?
+show access-lists 150
+# Zijn de regels aanwezig? Hit counter > 0 na test?</pre>
+</div>
 <div class="card">
 <h4>Essentiële show-commando's</h4>
 <table>
@@ -3816,6 +4333,7 @@ SW01-ARN(config-if)# no shutdown</pre>
 </div>
 
 <h3>Subnetting Snelreferentie</h3>
+<div class="note">🛠️ <strong>Handige tool tijdens het examen:</strong> <a href="https://networking-toolbox.as93.net/subnetting/ipv4-subnet-calculator" target="_blank" style="color:#4ec9b0;">networking-toolbox.as93.net</a> — vul een IP + subnetmask in en je ziet meteen network address, broadcast, host range en wildcard mask. Ook handig: <a href="https://networking-toolbox.as93.net/cidr/wildcard-mask" target="_blank" style="color:#4ec9b0;">Wildcard Mask Converter</a> voor ACL-berekeningen.</div>
 <div class="grid">
 <div class="card">
 <h4>Veelgebruikte subnetten</h4>
