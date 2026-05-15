@@ -2704,6 +2704,75 @@ amount = min(bedragen)
 <!-- EXAMEN OVERLEVINGSGIDS -->
 <!-- ═══════════════════════════════════════════════════════ -->
 
+<h3>⌨️ CLI Afkortingen — Volledig commando &amp; Verkorting</h3>
+<div class="grid">
+<div class="card">
+<h4>Modi wisselen</h4>
+<table>
+<tr><th>Volledig commando</th><th>Afkorting</th><th>Wat doet het?</th></tr>
+<tr><td><code>enable</code></td><td><code>en</code></td><td>Naar privileged mode (#)</td></tr>
+<tr><td><code>configure terminal</code></td><td><code>conf t</code></td><td>Naar global config mode</td></tr>
+<tr><td><code>interface FastEthernet0/1</code></td><td><code>int fa0/1</code></td><td>Naar interface config</td></tr>
+<tr><td><code>interface GigabitEthernet0/1</code></td><td><code>int g0/1</code></td><td>Naar gigabit interface</td></tr>
+<tr><td><code>interface vlan 30</code></td><td><code>int vlan 30</code></td><td>Naar VLAN interface</td></tr>
+<tr><td><code>interface range fa0/1-5</code></td><td><code>int range fa0/1-5</code></td><td>Meerdere poorten tegelijk</td></tr>
+<tr><td><code>exit</code></td><td><code>ex</code></td><td>Één niveau omhoog</td></tr>
+<tr><td><code>end</code></td><td><code>end</code></td><td>Direct terug naar # (Ctrl+Z doet hetzelfde)</td></tr>
+</table>
+</div>
+<div class="card">
+<h4>Show commando's</h4>
+<table>
+<tr><th>Volledig commando</th><th>Afkorting</th></tr>
+<tr><td><code>show running-config</code></td><td><code>sh run</code></td></tr>
+<tr><td><code>show startup-config</code></td><td><code>sh start</code></td></tr>
+<tr><td><code>show ip interface brief</code></td><td><code>sh ip int br</code></td></tr>
+<tr><td><code>show interfaces trunk</code></td><td><code>sh int trunk</code></td></tr>
+<tr><td><code>show vlan brief</code></td><td><code>sh vlan br</code></td></tr>
+<tr><td><code>show vtp status</code></td><td><code>sh vtp status</code></td></tr>
+<tr><td><code>show spanning-tree</code></td><td><code>sh span</code></td></tr>
+<tr><td><code>show ip route</code></td><td><code>sh ip route</code></td></tr>
+<tr><td><code>show ip dhcp binding</code></td><td><code>sh ip dhcp bind</code></td></tr>
+<tr><td><code>show access-lists</code></td><td><code>sh access-lists</code></td></tr>
+<tr><td><code>show cdp neighbors</code></td><td><code>sh cdp nei</code></td></tr>
+<tr><td><code>show mac address-table</code></td><td><code>sh mac add</code></td></tr>
+</table>
+</div>
+</div>
+<div class="grid">
+<div class="card">
+<h4>Configuratie commando's</h4>
+<table>
+<tr><th>Volledig commando</th><th>Afkorting</th></tr>
+<tr><td><code>copy running-config startup-config</code></td><td><code>copy run start</code> of <code>wr</code></td></tr>
+<tr><td><code>no shutdown</code></td><td><code>no shut</code></td></tr>
+<tr><td><code>switchport mode trunk</code></td><td><code>sw mo trunk</code></td></tr>
+<tr><td><code>switchport mode access</code></td><td><code>sw mo acc</code></td></tr>
+<tr><td><code>switchport access vlan 30</code></td><td><code>sw acc vlan 30</code></td></tr>
+<tr><td><code>switchport trunk allowed vlan all</code></td><td><code>sw trunk all vlan all</code></td></tr>
+<tr><td><code>ip address 10.10.30.1 255.255.255.0</code></td><td><code>ip add 10.10.30.1 255.255.255.0</code></td></tr>
+<tr><td><code>spanning-tree vlan 30 root primary</code></td><td><code>span vlan 30 root pri</code></td></tr>
+<tr><td><code>vtp mode server</code></td><td><code>vtp mo ser</code></td></tr>
+<tr><td><code>vtp mode client</code></td><td><code>vtp mo cli</code></td></tr>
+<tr><td><code>ip routing</code></td><td><code>ip routing</code> (geen afkorting)</td></tr>
+</table>
+</div>
+<div class="card">
+<h4>Handige CLI-trucjes</h4>
+<table>
+<tr><th>Truc</th><th>Uitleg</th></tr>
+<tr><td><code>Tab</code></td><td>Commando automatisch aanvullen</td></tr>
+<tr><td><code>?</code></td><td>Toon alle mogelijke opties op dit punt</td></tr>
+<tr><td><code>sh?</code></td><td>Toon alle commando's die beginnen met "sh"</td></tr>
+<tr><td><code>Pijl omhoog ↑</code></td><td>Vorig commando terugroepen</td></tr>
+<tr><td><code>Ctrl+Z</code></td><td>Direct terug naar # (zelfde als end)</td></tr>
+<tr><td><code>Ctrl+Shift+6</code></td><td>Stop vastgelopen commando (bijv. DNS lookup)</td></tr>
+<tr><td><code>no [commando]</code></td><td>Commando ongedaan maken — bijv. <code>no shutdown</code>, <code>no ip address</code></td></tr>
+</table>
+<div class="note">💡 Cisco accepteert elke afkorting zolang die <strong>uniek</strong> is. <code>conf t</code> werkt omdat geen ander commando begint met "conf t". Twijfel je? Druk op Tab om te zien of Cisco het herkent.</div>
+</div>
+</div>
+
 <h3>🗺️ Stap 0 — Lees het technisch ontwerp EERST (5 min)</h3>
 <div class="card">
 <h4>Voordat je ook maar 1 commando typt — doe dit:</h4>
@@ -3107,74 +3176,6 @@ Oorzaak 4: Switch-poort naar AP is geen access poort
 
 
 
-<h3>⌨️ CLI Afkortingen — Volledig commando &amp; Verkorting</h3>
-<div class="grid">
-<div class="card">
-<h4>Modi wisselen</h4>
-<table>
-<tr><th>Volledig commando</th><th>Afkorting</th><th>Wat doet het?</th></tr>
-<tr><td><code>enable</code></td><td><code>en</code></td><td>Naar privileged mode (#)</td></tr>
-<tr><td><code>configure terminal</code></td><td><code>conf t</code></td><td>Naar global config mode</td></tr>
-<tr><td><code>interface FastEthernet0/1</code></td><td><code>int fa0/1</code></td><td>Naar interface config</td></tr>
-<tr><td><code>interface GigabitEthernet0/1</code></td><td><code>int g0/1</code></td><td>Naar gigabit interface</td></tr>
-<tr><td><code>interface vlan 30</code></td><td><code>int vlan 30</code></td><td>Naar VLAN interface</td></tr>
-<tr><td><code>interface range fa0/1-5</code></td><td><code>int range fa0/1-5</code></td><td>Meerdere poorten tegelijk</td></tr>
-<tr><td><code>exit</code></td><td><code>ex</code></td><td>Één niveau omhoog</td></tr>
-<tr><td><code>end</code></td><td><code>end</code></td><td>Direct terug naar # (Ctrl+Z doet hetzelfde)</td></tr>
-</table>
-</div>
-<div class="card">
-<h4>Show commando's</h4>
-<table>
-<tr><th>Volledig commando</th><th>Afkorting</th></tr>
-<tr><td><code>show running-config</code></td><td><code>sh run</code></td></tr>
-<tr><td><code>show startup-config</code></td><td><code>sh start</code></td></tr>
-<tr><td><code>show ip interface brief</code></td><td><code>sh ip int br</code></td></tr>
-<tr><td><code>show interfaces trunk</code></td><td><code>sh int trunk</code></td></tr>
-<tr><td><code>show vlan brief</code></td><td><code>sh vlan br</code></td></tr>
-<tr><td><code>show vtp status</code></td><td><code>sh vtp status</code></td></tr>
-<tr><td><code>show spanning-tree</code></td><td><code>sh span</code></td></tr>
-<tr><td><code>show ip route</code></td><td><code>sh ip route</code></td></tr>
-<tr><td><code>show ip dhcp binding</code></td><td><code>sh ip dhcp bind</code></td></tr>
-<tr><td><code>show access-lists</code></td><td><code>sh access-lists</code></td></tr>
-<tr><td><code>show cdp neighbors</code></td><td><code>sh cdp nei</code></td></tr>
-<tr><td><code>show mac address-table</code></td><td><code>sh mac add</code></td></tr>
-</table>
-</div>
-</div>
-<div class="grid">
-<div class="card">
-<h4>Configuratie commando's</h4>
-<table>
-<tr><th>Volledig commando</th><th>Afkorting</th></tr>
-<tr><td><code>copy running-config startup-config</code></td><td><code>copy run start</code> of <code>wr</code></td></tr>
-<tr><td><code>no shutdown</code></td><td><code>no shut</code></td></tr>
-<tr><td><code>switchport mode trunk</code></td><td><code>sw mo trunk</code></td></tr>
-<tr><td><code>switchport mode access</code></td><td><code>sw mo acc</code></td></tr>
-<tr><td><code>switchport access vlan 30</code></td><td><code>sw acc vlan 30</code></td></tr>
-<tr><td><code>switchport trunk allowed vlan all</code></td><td><code>sw trunk all vlan all</code></td></tr>
-<tr><td><code>ip address 10.10.30.1 255.255.255.0</code></td><td><code>ip add 10.10.30.1 255.255.255.0</code></td></tr>
-<tr><td><code>spanning-tree vlan 30 root primary</code></td><td><code>span vlan 30 root pri</code></td></tr>
-<tr><td><code>vtp mode server</code></td><td><code>vtp mo ser</code></td></tr>
-<tr><td><code>vtp mode client</code></td><td><code>vtp mo cli</code></td></tr>
-<tr><td><code>ip routing</code></td><td><code>ip routing</code> (geen afkorting)</td></tr>
-</table>
-</div>
-<div class="card">
-<h4>Handige CLI-trucjes</h4>
-<table>
-<tr><th>Truc</th><th>Uitleg</th></tr>
-<tr><td><code>Tab</code></td><td>Commando automatisch aanvullen</td></tr>
-<tr><td><code>?</code></td><td>Toon alle mogelijke opties op dit punt</td></tr>
-<tr><td><code>sh?</code></td><td>Toon alle commando's die beginnen met "sh"</td></tr>
-<tr><td><code>Pijl omhoog ↑</code></td><td>Vorig commando terugroepen</td></tr>
-<tr><td><code>Ctrl+Z</code></td><td>Direct terug naar # (zelfde als end)</td></tr>
-<tr><td><code>Ctrl+Shift+6</code></td><td>Stop vastgelopen commando (bijv. DNS lookup)</td></tr>
-<tr><td><code>no [commando]</code></td><td>Commando ongedaan maken — bijv. <code>no shutdown</code>, <code>no ip address</code></td></tr>
-</table>
-<div class="note">💡 Cisco accepteert elke afkorting zolang die <strong>uniek</strong> is. <code>conf t</code> werkt omdat geen ander commando begint met "conf t". Twijfel je? Druk op Tab om te zien of Cisco het herkent.</div>
-</div>
-</div>
 
 <h3>Cisco CLI — Modi &amp; Navigatie</h3>
 <div class="grid">
