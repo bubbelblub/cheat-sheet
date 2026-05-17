@@ -2859,19 +2859,21 @@ amount = min(bedragen)
 <h4>Template — pas de naam aan voor elk apparaat</h4>
 <pre>! Klik op het apparaat in Packet Tracer → CLI tab → druk Enter
 
-en                              ! (en                  ! (enable)) → naar privileged mode (#)
-conf t                          ! (configure terminal) → naar configuratie mode
+en                              ! (enable)
+conf t                          ! (configure terminal)
 
 hostname Core01_ARN             ! ← AANPASSEN: naam uit het technisch ontwerp
 
-enable secret cisco             ! wachtwoord instellen (gebruik wat in ontwerp staat)
+enable secret cisco             ! wachtwoord instellen
 service password-encryption     ! wachtwoorden versleutelen
+no ip domain-lookup             ! ← ALTIJD DOEN! Voorkomt 30 sec wachttijd bij typfouten
+banner motd #Alleen bevoegd personeel#  ! waarschuwingstekst bij inloggen
 
 ! Opslaan — doe dit na ELKE stap!
 end
-wr                              ! (wr                              ! (copy running-config startup-config))
+wr                              ! (copy running-config startup-config)
 ! Druk Enter bij "Destination filename"</pre>
-<div class="warn-box">⚠️ <strong>Vergeet NOOIT</strong> aan het einde van elke stap: <code>end</code> → <code>wr                              ! (copy running-config startup-config)</code> → Enter</div>
+<div class="warn-box">⚠️ <strong>Vergeet NOOIT</strong> aan het einde van elke stap: <code>end</code> → <code>wr</code> → Enter</div>
 </div>
 
 <h3>🏗️ Stap 2 — Core switch: VLANs aanmaken + VTP instellen</h3>
@@ -3179,9 +3181,78 @@ sh access-lists                 ! (show access-lists)
 ! → ACL-regels aanwezig
 
 sh start                        ! (show startup-config)
-! → Config zichtbaar = alles opgeslagen</pre>
+! → Config zichtbaar = alles opgeslagen
+
+! Handig — bekijk alleen een specifiek stuk config:
+sh run | section dhcp           ! toont alleen DHCP-configuratie
+sh run | section ospf           ! toont alleen OSPF-configuratie
+sh run | include ip address     ! toont alle regels met "ip address"</pre>
 <div class="note">💡 <strong>Ping testen:</strong> PC → Desktop → Command Prompt → <code>ping 10.10.30.1</code> (gateway van dat VLAN). 4 van 4 antwoorden = werkt!</div>
 <div class="note">💡 <strong>Ping mislukt?</strong> Check: 1) juist VLAN? 2) trunk correct? 3) ip routing aan? 4) ACL blokkeert?</div>
+</div>
+
+<h3>📋 Testrapport — B1-K2-W2 (invullen ná configuratie!)</h3>
+<div class="note">📌 <strong>Het testrapport is verplicht voor W2!</strong> Voer elke test uit, noteer het resultaat en maak een screenshot. Zonder testrapport mis je punten ook al werkt alles perfect.</div>
+<div class="grid">
+<div class="card">
+<h4>Testactiviteit 1 — PC naar internet (www.solar.com)</h4>
+<pre>Uitvoering:
+  Noteer eerst IP van PC3: PC3 → Desktop → Command Prompt → ipconfig
+  PC3 (VLAN 40) → Desktop → Web Browser → typ www.solar.com → Go
+
+Verwacht:  Solar Plex website geladen
+Pakketpad: PC3 → SW02-ARN → Core01_ARN → Rtr_Inet → internet
+
+✅ Website geladen? → screenshot maken!
+❌ Niet geladen? → check ip routing, check default route op router</pre>
+</div>
+<div class="card">
+<h4>Testactiviteit 2 — PC naar intranet (172.16.5.30)</h4>
+<pre>Uitvoering:
+  Noteer eerst IP van PC5: PC5 → Desktop → Command Prompt → ipconfig
+  PC5 (VLAN 30) → Desktop → Web Browser → typ 172.16.5.30 → Go
+
+Verwacht:  Intranetpagina Solar Plex geladen
+Pakketpad: PC5 → SW01-ARN → Core01_ARN → Rtr_Inet → WAN → Nijmegen
+
+✅ Pagina geladen? → screenshot maken!
+❌ Niet geladen? → check OSPF: sh ip route, check WAN-verbinding</pre>
+</div>
+</div>
+<div class="grid">
+<div class="card">
+<h4>Testactiviteit 3 — Ping Nijmegen → Arnhem</h4>
+<pre>Uitvoering:
+  Stap 1: IP van PC4 opzoeken:
+          PC4 → Desktop → Command Prompt → ipconfig
+          Noteer: 10.10.30.____
+
+  Stap 2: PC2 (Nijmegen, VLAN 20) → Desktop → Command Prompt
+          ping 10.10.30.____
+
+Verwacht:  4 van 4 replies ontvangen
+Pakketpad: PC2 → WAN → Rtr_Inet → Core01_ARN → SW01-ARN → PC4
+
+✅ 4/4 replies? → screenshot maken!
+❌ Mislukt? → check of PC2 een geldig IP heeft (DHCP of statisch)</pre>
+</div>
+<div class="card">
+<h4>Testactiviteit 4 — Gast WiFi: intranet geblokkeerd, internet vrij</h4>
+<pre>Uitvoering:
+  Laptop_gast (VLAN 50) → Desktop → Web Browser
+
+  Test 1 — intranet (moet GEBLOKKEERD zijn):
+    Typ: http://172.16.5.30 → Go
+    Verwacht: Request Timeout ← ACL 150 blokkeert dit!
+
+  Test 2 — internet (moet WERKEN):
+    Typ: www.solar.com → Go
+    Verwacht: Solar Plex website geladen
+
+✅ 172.16.5.30 = timeout? → ACL werkt! Screenshot!
+✅ solar.com = geladen? → permit any any werkt! Screenshot!
+❌ solar.com ook geblokkeerd? → check: access-list 150 permit ip any any</pre>
+</div>
 </div>
 
 <h3>🆘 Problemen oplossen — meest voorkomende fouten</h3>
